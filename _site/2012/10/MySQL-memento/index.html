@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr" lang="fr">
+<head>
+   <meta charset="UTF-8" />
+   <title>Mysql Memento</title>
+   <meta name="author" content="danc" />
+   <link href="/atom.xml" rel="alternate" title="Flux RSS" type="application/atom+xml" />
+
+   <!-- Homepage CSS -->
+    <link href='http://fonts.googleapis.com/css?family=Droid+Sans:regular,bold&amp;subset=latin' rel='stylesheet' type='text/css'>
+   <link rel="stylesheet" href="/css/screen.css" type="text/css" media="screen, projection" />
+   <link rel="stylesheet" href="/css/syntax.css" type="text/css" media="screen, projection" />
+   <script src="/disqus.js" type="text/javascript"></script>
+   <!-- ie hrml5 compat-->
+   <script src="http://code.google.com/p/html5shiv/source/browse/trunk/html5.js"></script>
+     <!-- Highslide JS + CSS -->
+   <script type="text/javascript" src="/highslide/highslide-with-gallery.js"></script>
+   <link rel="stylesheet" type="text/css" href="/highslide/highslide.css" />
+   
+   <script type="text/javascript">
+hs.graphicsDir = '/highslide/graphics/';
+hs.align = 'center';
+hs.transitions = ['expand', 'crossfade'];
+hs.outlineType = 'rounded-white';
+hs.fadeInOut = true;
+// hs.autoplay = true;
+//hs.dimmingOpacity = 0.75;
+
+// Add the controlbar
+hs.addSlideshow({
+	//slideshowGroup: 'group1',
+	interval: 5000,
+	repeat: false,
+	useControls: true,
+	fixedControls: 'fit',
+	overlayOptions: {
+		opacity: .75,
+		position: 'bottom center',
+		hideOnMouseOut: true
+	}
+});
+</script>
+   
+</head>
+<body>
+<header>
+<div class="bandeau1"><a href="/">&nbsp;</a></div>
+<div class="bandeau">
+	<span class="top">
+		<a href="/">root</a>  &nbsp;&nbsp;
+	<span class="topics">   
+		<a href="/tag/">tags</a> 
+	</span>
+	</span>
+	<span><a href="/tag/presentation">à propos</a></span>&nbsp;
+	<!--span><a href="/tag/lien">liens</a></span-->&nbsp;
+</div>
+<br/>
+<span class="date">
+	<a class="zoom" href="/2012">2012</a>  
+	<a class="zoom" href="/2012/10">10</a>   
+	11
+</span>
+
+</header>
+<section>
+<div class="site">
+  <nav>
+<span id="categories">
+
+    
+        
+      <a href="/tag/MySQL">MySQL</a> &nbsp;
+    
+  
+</span>
+</nav>
+<!--div id="post"-->
+<article id="post">
+<h1>Mysql Memento</h1>
+
+<p>Un petit mémento de différentes  commandes :</p>
+<ul>
+	<li>Vérification des accès pour les utilisateurs:</li>
+</ul>
+<div class="highlight"><pre><code class="bat"><span class="lineno">1</span> use mysql;
+<span class="lineno">2</span> select Host<span class="p">,</span> User from user;
+</code></pre></div>
+
+</article>
+
+<footer>
+
+<div class="prevnext"> 
+	<a class="prev" href="/2012/06/adventure">
+	&larr;   Adventures of an (ex)-developper in the world of application management</a> &nbsp; 
+  
+  
+	<a class="next" href="/2013/02/ovftool"> 
+  Ovftool &rarr; </a>
+  
+</div>
+
+<hr>
+
+<div class="comments">
+ <a href="#disqus_thread" onclick="showComments('http://danc.alwaysdata.net', '/2012/10/MySQL-memento')" >vos commentaires ...</a>
+ <div class="p" id="comments"></div>
+</div>
+<script type="text/javascript">
+
+    var disqus_shortname = 'danc'; 
+    
+    (function () {
+        var s = document.createElement('script'); s.async = true;
+        s.type = 'text/javascript';
+        s.src = 'http://disqus.com/forums/' + disqus_shortname + '/count.js';
+        (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+    }());
+</script>
+</footer>
+
+</div>
+</section>
+</body>
+</html>

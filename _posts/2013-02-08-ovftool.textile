@@ -1,0 +1,24 @@
+---
+layout: post
+tags: [ VMware, OVF ]
+---
+
+
+
+Reminder to use ovftool to create an ova / ovf image of a virtual machine with VMWare player.
+The tool seem provided with WMWare Player (e.g. under Windows)
+
+{% highlight bat %}
+C:\Program Files (x86)\VMware Player\OVFTool\ovftool.exe -h
+
+ovftool [options] <source> [<target>]
+
+{% endhighlight %}
+
+So, to make a .ova file of your vm :
+
+{% highlight bat %}
+ovftool Source.vmx Destination.ova
+{% endhighlight %}
+
+

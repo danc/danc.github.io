@@ -1,0 +1,72 @@
+---
+layout: post
+date: 2010-12-21
+published: false
+tags: [ qualite, agile, scrum, maven, hudson, sonar, nexus, code ]
+title: Checklist sur un projet de développement logiciel
+---
+
+- Objectifs :
+  * Améliorer la qualité logicielle, interne et externe
+		* interne : qualité perçue par les équipes, confiance dans le produit
+		* externe : prise en compte des exigences, performances, évolutivité
+  * Améliorer la productivité logicielle
+		* réactivité, process, culture d'équipe, agilité ?
+		
+  * Déclinaison des objectifs principaux en objectifs/tâches/moyens adaptés, priorisés
+  * Estimation des investissements, coûts de mise en oeuvre, de maintenance, et ROI de chacune des tâches
+
+- Etat des lieux :
+  * Comment se déroule un projet ? Quel est son cycle réel (reqs/specs/codage/TU/integration/validation/livraison/maintenance) ?
+  * Quelles sont les entrées/sorties du projet (documents, livrables) ?
+  * Sous quelle forme, et à quelle période, les exigences entrent dans le projet ?
+  * Quels indicateurs existent sur le projet ? Comment sont-ils établis ? pour qui ? Comment sont-ils utilisés ?
+     ex: LoC, nombre TUs, qualimétrie, nb bugs, exigences prises en compte, ...
+  * Quel degré d'automatisation, d'outillage est déjà en place, et à quelle étape du cycle de vie ?
+  
+- Points importants :
+  * des tests unitaires (TU) sont ils mis en place ? avec un outil de couverture de tests ?
+  * Existe-t-il des revues de code/architecture ? qui y est associé ?
+  * Existe-t-il une traçabilité exigence-spécifications-développement-tests ? avec quel outil ?
+  * Existe-t-il un plan qualité logiciel ? 
+  * Existe-t-il un plan de gestion de configuration ?
+  * Fait-on la différence entre TU et tests d'intégration, de validation ? dispose-t-on d'outils automatisés pour les dérouler ?
+  * Quelles sont les capacités d'introspection de l'équipe (bilans, revues, refactoring, communication interne, ...)
+  
+  
+- Expériences, et proposition d'outils ou de pistes de travail
+  * Sensibilisation aux tests unitaires, automatisés (TU et TI) 
+    -> Orange Labs/Orange update 
+		4 développeurs C++
+		Montée en compétence de l'équipe sur TU, 
+		Stagnation des TUs : mise en place de librairies de mock
+		
+	-> formation interne DT SII : TU et librairies de mock
+		retour d'expérience pour 2x 15 personnes pôle CIM (DT SII)
+		
+  * Ingéniérie des exigences
+  
+    -> QualityCenter, groupe Orange
+	-> etude comparative d'outils de gestion des exigences (Salomé, RTH, XStudio) pour DT SII
+	
+  * Méthodes agiles, Scrum
+  	-> certifié ScrumMaster en 2009, formation par des intervenants auprès de 'Fortune 500' US
+    -> OrangeLabs/Orange update : 
+		équipe multi-sites : intervention en tant qu'architecte logiciel + support ScrumMaster
+		8 mois de développement / 10 + sprints de 2 à 3 semaines 
+		Revues de code/refactoring
+		Planifications de sprints et démos de sprints
+		Daily meeting inter-site (telephone + mail + messagerie instantanée + rencontres régulières pour points techniques spécifiques)
+		Outil partagé ScrumWorks
+		Gestion des exigences/defects sous QualityCenter
+		Mise en place de tests fonctionnels automatisés (hudson + scripts python)
+		
+  * Automatisation des process et gestion du cycle :
+    -> intégration continue hudson (Orange labs + interne DT SII, plusieurs équipes de 2 à 6 personnes, technologies variées Java JEE/C++/Flex/Dojo/PHP/... )
+	-> Mise en place d'une infrastructure maven + Nexus : gestion des dépendance et rationalisation de l'organisation des projets (DT SII)
+	-> Analyse qualimétrique : Mise en place Sonar + plugins hudson PMD, Checkstyle, couverture de tests (DT SII)
+  * ~ 15 ans expérience développement objet, conception UML, Design Patterns
+  * ~ 5 ans architecture fonctionnelle et logicielle, en contexte R&D 
+	
+Blog pro perso (depuis 12/2010 !) http://danc.alwaysdata.net
+

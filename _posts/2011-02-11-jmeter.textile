@@ -1,0 +1,53 @@
+---
+layout: post
+date: 2011-02-11
+tags: [ jmeter, test, outil, slide]
+title: Tour d'horizon JMeter
+---
+
+Une présentation sur l'outil JMeter, faite en un temps record grâce aux notes du wiki et à quelques excellentes resources du web ( + l'épluchage de la doc officielle).
+
+Et le secours de Nicolas qui m'a produit un webservice CXP en un temps record !
+
+
+* Tour d’horizon et pratique JMeter
+* Types de tests de performance
+* Eléments de JMeter
+* Tests de charge
+* Ordre d’exécution
+* Exemple
+* Règles de portée des éléments
+* Mise en pratique - installation
+* Écriture d'un scénario
+* Exemple 1
+* Paramétrage des tests : CSV
+* Exercice : utilisation d’une source CSV
+* Paramétrage des tests
+* Configuration JDBC
+* Echantillon JDBC
+* Exemple  : appels JDBC 
+* Variabilisation des tests: RegExpr
+* RegExpr : intro
+* RegExpr exemples
+* Regexp : testeur de regexp
+* Exercice: Regexp
+* Echantillon Requête Webservice SOAP
+* Exemple  : Web Services
+* Fonctions
+* BeanShell
+* Tirs aveugles
+* Tirs aveugles : ligne de commande
+* Tirs aveugles : summariser
+* Exécution à distance
+* Exécution à distance : batch
+* Exploitation des résultats
+* Enregistreur de données
+* Jmeter et intégration continue
+* Bonnes pratiques 1
+* Bonnes pratiques 2
+* Pour aller plus loin	
+
+----
+En finissant les slides, j'apprends que Moubarak n'est plus président.
+
+Το έργο αυτό είναι αφιερωμένο στους Αιγυπτίους και Τυνήσιοι Λαών

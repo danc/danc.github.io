@@ -1,0 +1,8 @@
+---
+layout: post
+date: 2010-12-03
+tags: [ lien, collegue ]
+title: Dojo et Programmation Objet
+---
+
+"Une très bonne introduction à la programmation objet en Javascript":http://sii-rennes.developpez.com/tutoriels/javascript/dojo-et-programmation-orientee-objet/ , par Frédéric Bouchery

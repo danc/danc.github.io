@@ -1,0 +1,39 @@
+---
+layout: post
+tags: [jekyll, blog, ruby]
+---
+
+Je n'ai jamais vraiment aimé les bases de données (un vieux reste scolaire ?).
+
+Les CMS en PHP/MYSQL sont de plus en plus complexes à faire évoluer, demandent des ressources sur la machine d'hébergement.
+Aussi j'ai bondit quand j'ai découvert "Jekyll":http://wiki.github.com/mojombo/jekyll :
+
+* cela compile un ensemble de pages HTML 
+* à partir de fichiers avec une syntaxe simple (textile, markdown, ...), 
+* en permettant avec quelques extensions de gérer tags, flux xml, archives, 
+* en appliquant des modèles de pages
+* génération des flux RSS si on veut
+
+en plus c'est écrit en "_Ruby_":http://ruby-lang.org, un langage qui me plait bien et qui reprend plein de bonnes idées de _Smalltalk_ (et de moins bonnes de _Perl_).
+
+Bénéfices pour un utilisateur de base :
+* 0 contraintes d'hébergement (même pas php, mysql)
+* pas de calcul côté serveur
+* edition des pages hyper simplifiée : n'importe quel éditeur (qui respecte l'encodage UTF-8, quand même ...)
+* séparation complète entre fond et forme : il faut juste déclarer quel est son modèle de page, et ses tags
+* on peut se promener partout avec son site et le mettre à jour, sur une clé USB 
+* même pas dépendant du _nuage_ (cloud computing)
+* mais on peut très bien le gérer en ligne quand même
+
+Bénéfices pour un utilisateur un peu plus technique :
+* seule dépendance technique : ruby + jekyll ( + jekyll_ext )
+* gestion transparente des rubriques par des tags ou catégories (avec des "extensions":http://wiki.github.com/mojombo/jekyll/extendinghacking-on-jekyll)
+* test possible complet côté client, avec juste ruby + jekyll (gem ruby) + jekyll_ext (pour les tags, etc ...)
+* liberté totale sur la feuille de style, l'agencement des pages : là, il faut faire un peu de css + liquid (gem ruby) pour la disposition des pages
+* possibilité de bidouiller soi même le code pour imaginer des choses encore plus dingues
+* on sauvegarde naturellement son site (pas de backup sql)
+* on peut le gérer avec un système de gestion de code ("git":http:/tag/git/ par exemple)
+* les URLs sont indépendantes du domaine d'hébergement. On peut déplacer le site comme on veut.
+* generation flux RSS, atom
+* enfin des URL propres sans URL-rewriting !
+

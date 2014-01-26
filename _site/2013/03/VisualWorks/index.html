@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr" lang="fr">
+<head>
+   <meta charset="UTF-8" />
+   <title>Visualworks</title>
+   <meta name="author" content="danc" />
+   <link href="/atom.xml" rel="alternate" title="Flux RSS" type="application/atom+xml" />
+
+   <!-- Homepage CSS -->
+    <link href='http://fonts.googleapis.com/css?family=Droid+Sans:regular,bold&amp;subset=latin' rel='stylesheet' type='text/css'>
+   <link rel="stylesheet" href="/css/screen.css" type="text/css" media="screen, projection" />
+   <link rel="stylesheet" href="/css/syntax.css" type="text/css" media="screen, projection" />
+   <script src="/disqus.js" type="text/javascript"></script>
+   <!-- ie hrml5 compat-->
+   <script src="http://code.google.com/p/html5shiv/source/browse/trunk/html5.js"></script>
+     <!-- Highslide JS + CSS -->
+   <script type="text/javascript" src="/highslide/highslide-with-gallery.js"></script>
+   <link rel="stylesheet" type="text/css" href="/highslide/highslide.css" />
+   
+   <script type="text/javascript">
+hs.graphicsDir = '/highslide/graphics/';
+hs.align = 'center';
+hs.transitions = ['expand', 'crossfade'];
+hs.outlineType = 'rounded-white';
+hs.fadeInOut = true;
+// hs.autoplay = true;
+//hs.dimmingOpacity = 0.75;
+
+// Add the controlbar
+hs.addSlideshow({
+	//slideshowGroup: 'group1',
+	interval: 5000,
+	repeat: false,
+	useControls: true,
+	fixedControls: 'fit',
+	overlayOptions: {
+		opacity: .75,
+		position: 'bottom center',
+		hideOnMouseOut: true
+	}
+});
+</script>
+   
+</head>
+<body>
+<header>
+<div class="bandeau1"><a href="/">&nbsp;</a></div>
+<div class="bandeau">
+	<span class="top">
+		<a href="/">root</a>  &nbsp;&nbsp;
+	<span class="topics">   
+		<a href="/tag/">tags</a> 
+	</span>
+	</span>
+	<span><a href="/tag/presentation">à propos</a></span>&nbsp;
+	<!--span><a href="/tag/lien">liens</a></span-->&nbsp;
+</div>
+<br/>
+<span class="date">
+	<a class="zoom" href="/2013">2013</a>  
+	<a class="zoom" href="/2013/03">03</a>   
+	26
+</span>
+
+</header>
+<section>
+<div class="site">
+  <nav>
+<span id="categories">
+
+    
+        
+      <a href="/tag/VisualWorks">VisualWorks</a> &nbsp;
+    
+      <a href="/tag/Smalltalk">Smalltalk</a> &nbsp;
+    
+  
+</span>
+</nav>
+<!--div id="post"-->
+<article id="post">
+<h1>Visualworks</h1>
+
+<h2 id="installation_visualworks">Installation VisualWorks</h2>
+
+<ul>
+<li>Inscription sur le site cincomsmalltalk.com</li>
+
+<li>Téléchargement du .iso (~640 Mo)</li>
+
+<li><a href="http://www.cincomsmalltalk.com/casts/stDaily/2009/smalltalk_daily-09-10-09-lg.mp4">Vidéo d’installation</a></li>
+
+<li><a href="http://www.slysoft.com/en/virtual-clonedrive.html">Pour monter le .iso comme un disque sous Windows</a></li>
+
+<li>Lancement automatique ou manuel de installWin.bat (installable aussi sous Linux ou Mac)</li>
+</ul>
+
+<h2 id="lancement_de_visualworks">Lancement de VisualWorks</h2>
+
+<p><a href="http://www.cincomsmalltalk.com/main/products/visualworks/follow-up/">Les liens pour débuter</a></p>
+
+<p><a href="http://www.cincomsmalltalk.com/casts/stDaily/2009/smalltalk_daily-09-11-09-lg.mp4">Notamment, comment utiliser une image particulière, une fois le runtime installé</a></p>
+
+<p>Une fois le runtime installé sous Windows, une entrée de menu permet de le lancer (VisualWorks Projects) Le premier lancement indique qu’aucun projet n’existe, et indique l’endroit ou les projets sont stockés.</p>
+
+<h1 id="crer_un_projet_dummy_pour_tester">Créer un projet dummy pour tester</h1>
+
+<ul>
+<li>création d’un sous répertoire dummy sous D:\Users\xxx\Documents\VisualWorks Projects\</li>
+
+<li>création des fichiers dummy.im (image bytecode)</li>
+
+<li>création d’un fichier dummy.cha (code source des modifications)</li>
+
+<li>Ouverture de l’enviroonnement VisualWorks avec tous les outils (browser, transcript, …)</li>
+</ul>
+
+<h1 id="projet_existant">Projet Existant</h1>
+
+<p>Si on dispose de ces fichiers pour un projet existant, il suffit donc de les recopier au même endroit</p>
+
+<ul>
+<li>au lancement, le nouveau projet apparait. Si il a été créé avec une version précédente de VisualWorks, un avertissement apparaît</li>
+
+<li>Dans la fenêtre d’accueil File/Set VisualWorks Home / Paste Current / Apply</li>
+</ul>
+
+<h2 id="utilisation_de_visualworks">Utilisation de VisualWorks</h2>
+
+<h1 id="navigation_dans_le_code">Navigation dans le code</h1>
+
+<p>Le ‘System Browser’ est l’outil principal pour naviguer dans le code. 4e icone en partant de la gauche ‘Open a System Browser’ * La zone ‘Find’ permet de rechercher des éléments (classes) par leur nom ou une partie de leur nom (ex: HTML)</p>
+
+<h1 id="recherche_dans_le_code">Recherche dans le code</h1>
+
+<ul>
+<li>Il est aussi possible de faire une recherche textuelle dans le code : Sélectionner les classes ou packages désirés (CTRL A pour tous)</li>
+</ul>
+
+<p>Onglet ‘Code Search’, ‘Search string’</p>
+
+<p>L’outil va alors ouvrir une fenêtre de toutes les méthodes contenant le texte recherché (Case sensitive si option cochée)</p>
+
+<p>Certains messages d’erreur peuvent survenir si on n’a pas accès au code source des classes recherchées. (ignorer)</p>
+
+<p>Une fois la recherche terminée, il est possible d’exporter la liste des méthodes concernées dans un fichier .csv (Method / Export CSV). Le fichier est généré dans le répertoire de travail.</p>
+
+<p>PACKAGE;VERSION;NAMESPACE;CLASSE;METHODE</p>
+
+<p>Le renommer avec l’item recherché (ex: “BODY Export recherche Packages 2013-03-26 11-36.csv” pour la recherche de BODY), éventuellement purgé des éléments non souhaités (ex: PACKAGE BODY pour des méthodes SQL alors que l’on cherche BODY pour la génération HTML)</p>
+
+</article>
+
+<footer>
+
+<div class="prevnext"> 
+	<a class="prev" href="/2013/02/ovftool">
+	&larr;   Ovftool</a> &nbsp; 
+  
+  
+	<a class="next" href="/2013/10/talend"> 
+  Talend &rarr; </a>
+  
+</div>
+
+<hr>
+
+<div class="comments">
+ <a href="#disqus_thread" onclick="showComments('http://danc.alwaysdata.net', '/2013/03/VisualWorks')" >vos commentaires ...</a>
+ <div class="p" id="comments"></div>
+</div>
+<script type="text/javascript">
+
+    var disqus_shortname = 'danc'; 
+    
+    (function () {
+        var s = document.createElement('script'); s.async = true;
+        s.type = 'text/javascript';
+        s.src = 'http://disqus.com/forums/' + disqus_shortname + '/count.js';
+        (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+    }());
+</script>
+</footer>
+
+</div>
+</section>
+</body>
+</html>

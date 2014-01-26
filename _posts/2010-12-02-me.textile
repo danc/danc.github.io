@@ -1,0 +1,37 @@
+---
+layout: post
+date: 2010-12-02
+tags: [ presentation, blog ]
+title: à propos
+---
+
+Quelle idée de compiler un interpréteur Lisp en C sur un Amstrad CPC !...
+
+Quel idée de développer un librairie de sémaphores "à la Ada" pour une machine Lisp ?
+
+Et un simulateur de langage d'acteur réparti sur un réseau de machines ...
+
+J'ai pourtant commis ce genre de choses, il y a fort longtemps, et vous pouvez en déduire à peu près mon âge ...
+
+J'ai ensuite découvert avec beaucoup d'enthousiasme Smalltalk, et j'en ai fait à haute dose pendant plus de 10 ans. (et encore de temps en temps).
+
+Après avoir mis la main sur un CD linux, j'ai repris du plaisir à jouer avec des ordinateurs, en pleine liberté et autonomie.
+
+Récemment, j'ai découvert Ruby, et dit du mal de C++ et PHP (pardon Frédéric).
+
+Mais on ne va pas être sectaire, on se connaît à peine ...
+
+Sinon, je travaille chez "SII Rennes":http://www.sii.fr, suis "ScrumMaster certifié":http://www.scrumalliance.org/profiles/70169-cortinovis-daniel , architecture logiciel, consultant, curieux.
+
+Et plus encore ...
+
+"Mon CV est par là":http://perso.apec.fr/daniel_cortinovis
+
+---
+Au fait, pourquoi un blog chez alwaysdata ?
+
+    * parce que ça a l'air d'être un hébergeur sympa
+    * c'est en France,
+    * et surtout il y a du python et du ruby dedans, et à titre personel, ça me plaît bien !
+    * un accès ssh et webdav, c'est pas commun non plus
+    * le défi de tout tenir en 10Mo ("bye bye, wordpress":/2010/05/jekyll/)

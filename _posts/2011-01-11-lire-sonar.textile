@@ -1,0 +1,14 @@
+---
+layout: post
+date: 2011-01-11
+published: true
+tags: [ sonar ]
+title: Lire un résultat fourni par sonar
+---
+
+Une fois mis en place une infrastructure "maven":/tag/maven + "Sonar":/tag/sonar , mavenisé les projets et piloté leur intégration continue via "hudson":/tag/hudson ,
+nous voilà avec des projets analysés par sonar.
+ 
+Un chef de projet avisé demande alors : "ok, comment se lit cette belle page sonar pour mon projet ? Que puis-je faire avec ?"
+
+Voici donc un début de réponse sous forme de "slides [pdf]":/slide/sonar-lecture/sonar_lecture.pdf

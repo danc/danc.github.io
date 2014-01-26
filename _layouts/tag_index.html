@@ -1,0 +1,30 @@
+---
+layout: default
+---
+
+<!--span class="citation">{{ page.citation }} </span-->
+
+{% if page.related %}
+<div id="categories">
+<h1 > Tags associés : </h1>
+<ul>
+{% for tag in page.related %}
+	<li>
+		&nbsp;<a href="/tag/{{ tag }}">{{ tag }}</a>
+	</li>
+{% endfor %}
+</ul>
+
+{% endif %}
+</div>
+
+<div id="prez"><h1> Tag: {{ page.tag }} </h1>
+<ul>
+{% for post in site.tags[page.tag] %}
+  <li> 
+    <a class="zoom" href="{{post.url}}">&nbsp;{{ post.title }}</a>
+  </li>
+{% endfor %}
+</ul>
+</div>
+

@@ -1,0 +1,57 @@
+---
+layout: post
+tags: [ RHEL, linux]
+---
+
+Utilisant principalement à la maison "Debian":http://www.debian.org , je suis amené à travailler sur des machines "Red Hat":http://www.redhat.com .
+
+Un petit mémento des différences dans les commandes linux :
+* Ajout d'un utilisateur yyy dans un nouveau groupe xxx
+	groupadd xxx
+	useradd -d /users/yyy -g xxx yyy
+	passwd -n 0 -x 99999 -i -1 --stdin yyy
+
+ 
+* Installation de packages
+	yum search httpd
+	yum info httpd
+	yum install httpd
+	yum install wireshark
+	yum erase httpd
+
+ou 
+* Installation :
+    rpm -ivh package.rpm
+-i for install
+-v for verbose
+* Upgrade :
+    rpm -Uvh newerpackage.rpm
+-U for upgrade
+-e for erase
+
+les repositories sont définis sous /etc/yum.repos.d
+	
+* Packages installés
+	rpm -qa
+	
+* recup depuis le web, avec authentification
+ wget --http-user user --http-password password http://www.site.com/file
+ 
+* Démarrage /status/ arrêt de services
+	service httpd start
+	service httpd status
+	service httpd stop
+
+* Mise à jour
+	yum repolist   # list les repositories disponibles
+	yum check-update
+	yum update
+
+* Télécharger seulement un rpm
+http://www.cyberciti.biz/faq/yum-downloadonly-plugin/
+	yum install yum-downloadonly
+	yum update httpd -y --downloadonly 
+	yum reinstall perl-DBI-1.52-2.el5.x86_64  --downloadonly
+
+	packages téléchargés sous /var/cache/yum/*/packages
+	

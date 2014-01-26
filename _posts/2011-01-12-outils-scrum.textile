@@ -1,0 +1,52 @@
+---
+layout: post
+date: 2011-01-12
+published: false
+tags: [ scrum ]
+title: Comparatif d'outils Scrum
+---
+
+- IceScrum a sorti une nouvelle version (réécriture complète grails+groowy+Jquery ) en novembre 2010 . c'est cette version que j'ai testée.
+- Cela n'a plus l'air d'être un projet d'étude : annonce de la réactivation d'un support professionnel http://www.icescrum.org/index.php/2010/10/new-icescrum-release/  
+- Toutefois difficile de statuer sur la stabilité d'un projet, c'est le lot de tous les projets GPL, comme pour Kunagi
+
+- J'ai joué rapidement avec Kunagi hier soir et ce matin : La philosophie des deux produits a l'air très proche
+- Feature vs Qualities : on retrouve la même idée de gestion des besoins clients . Pas trouvé toutefois  d'équivalent du 'parking lot sou's kunagi (% avancement par besoin utilisateur)
+- On retrouve un whiteboard, l'historique des actions, un sandbox, gestion des releases ...
+
+- plus de Kunagi : tout l'onglet 'Collaboration' avec Wiki/Forum/calendar/File upload
+- Ce sont toutefois des applications aggrégées qui peuvent aisément être remplacées par des outils adéquats.
+- gestion des impediments
+- gestion des risques
+
+- moins de Kunagi :
+ - pas de pièces jointes aux stories
+ - sorties seulement en PDF
+ - beaucoup moins de sorties graphiques que IS (uniquement burndownchart)
+
+
+Globalement je trouve IS plus clair (il y a presque trop de choses dans kunagi !), mais l'important est que l'équipe soit à l'aise avec l'outil qu'elle a pu choisir.
+
+-----
+message de Vincent Simon :
+IceScrum²
+- Je ne l'ai pas réessayé depuis 6 mois, mais il restait trop buggé et pas assez fiable (rsk: projet d'étude, donc turnover des développeurs).
+
+PivotalTracker :
+- est bien pour le suivi du Backlog Produit
+- nécessite un outil supplémentaire ou scrumboard pour suivre le Backlog de sprint.
+- ne permet pas une estimation d'effort supérieure à 8, donc force à décomposer assez finement les stories
+- API pour l'interfacer avec des solutions tierses
+
+ScrumWorks :
+- pas très UserFriendly
+
+Sinon, j'ai exploité le temps qui m'était donné pour tester les solutions gratuites émergentes, et j'ai été agréablement surpris par Kunagi qui couvre presque tout ce qui est requis :
+- Product Backlog : Releases, User stories
+- Sprint Backlog : Scrumboard, tasks
+- Faits techniques (avec sandbox permettant de (1) refuser le FT, (2) l'accepter comme anomalie, (3) le soumettre comme user story)
+- Projet : risques, problèmes avérés, journal de bord
+- Collaboratif : wiki projet, forum, calendrier, dépôt de fichiers et même un "tribunal"
+- Déployable en interne
+
+Site : http://kunagi.org/index.html 

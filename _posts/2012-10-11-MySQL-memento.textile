@@ -1,0 +1,15 @@
+---
+layout: post
+tags: [ MySQL ]
+---
+
+
+
+Un petit mémento de différentes  commandes :
+* Vérification des accès pour les utilisateurs:
+
+{% highlight bat linenos %}
+use mysql;
+select Host, User from user;
+
+{% endhighlight %}

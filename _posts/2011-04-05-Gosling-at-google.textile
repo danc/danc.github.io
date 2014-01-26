@@ -1,0 +1,12 @@
+---
+layout: post
+date: 2011-04-05
+tags: [ google, java, Citations]
+title:  Gosling at Google
+---
+
+ "I find myself starting employment at Google today. One of the toughest things about life is making choices. I had a hard time saying 'no' to a bunch of other excellent possibilities. I find it odd that this time I'm taking the road more travelled by, but it looks like interesting fun with huge leverage."
+
+"http://nighthacks.com/roller/jag/entry/next_step_on_the_road":http://nighthacks.com/roller/jag/entry/next_step_on_the_road
+
+James Gosling, 29/03/2011

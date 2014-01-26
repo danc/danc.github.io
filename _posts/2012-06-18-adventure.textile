@@ -1,0 +1,46 @@
+---
+layout: post
+date: 2012-06-18
+tags: [ en ]
+title: Adventures of an (ex)-developper in the world of application management
+---
+
+
+
+After more than one year as project manager on a portal for a new offer in the cloud, some thoughts and impressions of this new experience :
+
+h2. The good
+
+I was really impressed by the teams I met here. 
+Even if always running out of time, most people take the time to explain, guide you trough the maze of networks and processes and tools.
+Event though I would have appreciated a sort of nearly impossible to build 'welcome package', I rarely felt dead-end in front of an impossible solution.
+And of course, the technical and organizational skills were as high as I could expect. (with enough decontraction and fun to put the pressure at a reasonable level).
+Thanks to all for that !
+
+As an old programmer, I am convinced of the importance of testing and documentation, but it's far more obvious when you manage an application :
+- rule1 : the environment is never the same as the developer's one : be prepared ! Test platforms are your friends : take care of them.
+- rule2 : the installer is not a programmer and can't aways adapt your code to the platform : have a good and exhaustive documentation !
+
+h2. The bad
+
+Ok, no welcome package for the newcomer, but still the impression of a multitude of tools, process, networks, sometimes for the same functionality.
+The impression of learning to swim in a huge pool is sometimes strong.
+
+As an ex-developper, I may have a biased perception in the make-vs-buy debate. 
+Of course, we can't always reinvent the wheel, we have to go fast on new markets, and concentrate the effort on added-value.
+But I still believe that a close proximity with coding experience allows :
+- reactivity
+- innovation
+- better understanding of the technical limitations
+- better response to end-user expectations
+- less vendor lock-in
+
+h2. The ugly
+
+Most of the time, requesting a flow opening is a seamless experience, but it may sometimes transform as the ugliest experience in your worst nightmares.
+
+As a naïve requester, I have no idea of the firewalls and networks crossed by my IP packets (nothing about that in the welcome package).
+I would highly appreciate a single kiosk to post my request, with network experts relaying the request from end-to-end.
+This would be more gratifying for everyone, and less time consuming ! (and better sleeping)
+
+However, it's still a great experience to deploy a portal for thousands of users in the next years !
