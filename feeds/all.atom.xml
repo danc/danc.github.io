@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Don't Panic</title><link href="http://danc.github.io/" rel="alternate"></link><link href="http://danc.github.io/feeds/all.atom.xml" rel="self"></link><id>http://danc.github.io/</id><updated>2016-05-24T00:00:00+02:00</updated><entry><title>Premier contact avec Titan DB</title><link href="http://danc.github.io/premier-contact-avec-titan-db.html" rel="alternate"></link><updated>2016-05-24T00:00:00+02:00</updated><author><name>Daniel</name></author><id>tag:danc.github.io,2016-05-24:premier-contact-avec-titan-db.html</id><summary type="html">&lt;p&gt;Quelques notes sur la mise en place de &lt;a href="http://titan.thinkaurelius.com/"&gt;Titan&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;&lt;a href="http://s3.thinkaurelius.com/docs/titan/1.0.0/getting-started.html"&gt;Guide de démarrage&lt;/a&gt;&lt;/p&gt;
+&lt;h2&gt;Installation de Java 8&lt;/h2&gt;
+&lt;p&gt;&lt;a href="https://doc.ubuntu-fr.org/java_proprietaire"&gt;Sur Ubuntu&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;puis configuration de cette version par défaut :&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;    sudo update-alternatives --config java
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h2&gt;Installation de Titan&lt;/h2&gt;
+&lt;p&gt;&lt;a href="https://github.com/thinkaurelius/titan/wiki/Downloads"&gt;Téléchargement&lt;/a&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;    $ unzip titan-1.0.0-hadoop1.zip
+    Archive:  titan-1.0.0-hadoop1.zip
+    creating: titan-1.0.0-hadoop1/
+    ...
+    $ cd titan-1.0.0-hadoop1
+    $ bin/gremlin.sh
+
+             \,,,/
+             (o o)
+    -----oOOo-(3)-oOOo-----
+    09:12:24 INFO  org.apache.tinkerpop.gremlin.hadoop.structure.HadoopGraph  - HADOOP_GREMLIN_LIBS is set to: /usr/local/titan/lib
+    plugin activated: tinkerpop.hadoop
+    plugin activated: aurelius.titan
+    gremlin&amp;gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h2&gt;Initialisation d'une base sur un backend BerkeleyDB&lt;/h2&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;        gremlin&amp;gt; graph = TitanFactory.open(&amp;#39;conf/titan-berkeleyje-es.properties&amp;#39;)
+        ==&amp;gt;standardtitangraph[berkeleyje:../db/berkeley]
+        gremlin&amp;gt; GraphOfTheGodsFactory.load(graph)
+        ==&amp;gt;null
+        gremlin&amp;gt; g = graph.traversal()
+        ==&amp;gt;graphtraversalsource[standardtitangraph[berkeleyje:../db/berkeley], standard]
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h2&gt;Initialisation d'une base sur un backend Cassandra&lt;/h2&gt;
+&lt;p&gt;Note : Titan 1.0.0 semble compatible avec Cassandra 2.X &lt;a href="http://www.datastax.com/2015/03/qa-cassandra-and-titandb-insights-into-datastaxs-graph-strategy"&gt;ref&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;Une version de cassandra et d'elasticsearch est fournie avec le téléchargement de Titan.&lt;/p&gt;
+&lt;p&gt;On les démarre :&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;        bin/cassandra -f
+        bin/elastisearch
+        gremlin&amp;gt; graph = TitanFactory.open(&amp;#39;conf/titan-cassandra-es.properties&amp;#39;)
+            ==&amp;gt;standardtitangraph[cassandrathrift:[127.0.0.1]]
+        gremlin&amp;gt; GraphOfTheGodsFactory.load(graph)
+            ==&amp;gt;null
+        gremlin&amp;gt; g = graph.traversal()
+            ==&amp;gt;graphtraversalsource[standardtitangraph[cassandrathrift:[127.0.0.1]], standard]
+&lt;/pre&gt;&lt;/div&gt;</summary><category term="bigdata"></category><category term="graph"></category></entry></feed>

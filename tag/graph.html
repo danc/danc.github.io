@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+        <meta charset="utf-8" />
+        <title>Don't Panic - graph</title>
+        <link rel="stylesheet" href="http://danc.github.io/theme/css/main.css" />
+        <link href="http://danc.github.io/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Don't Panic Atom Feed" />
+
+        <!--[if IE]>
+            <script src="https://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+        <![endif]-->
+</head>
+
+<body id="index" class="home">
+        <header id="banner" class="body">
+                <h1><a href="http://danc.github.io/">Don't Panic </a></h1>
+                <nav><ul>
+                    <li><a href="http://danc.github.io/category/misc.html">misc</a></li>
+                </ul></nav>
+        </header><!-- /#banner -->
+
+            <aside id="featured" class="body">
+                <article>
+                    <h1 class="entry-title"><a href="http://danc.github.io/premier-contact-avec-titan-db.html">Premier contact avec Titan DB</a></h1>
+<footer class="post-info">
+        <abbr class="published" title="2016-05-24T00:00:00+02:00">
+                Published: mar. 24 mai 2016
+        </abbr>
+
+        <address class="vcard author">
+                By                         <a class="url fn" href="http://danc.github.io/author/daniel.html">Daniel</a>
+        </address>
+<p>In <a href="http://danc.github.io/category/misc.html">misc</a>.</p>
+<p>tags: <a href="http://danc.github.io/tag/bigdata.html">bigdata</a> <a href="http://danc.github.io/tag/graph.html">graph</a> </p>
+</footer><!-- /.post-info --><p>Quelques notes sur la mise en place de <a href="http://titan.thinkaurelius.com/">Titan</a>.</p>
+<p><a href="http://s3.thinkaurelius.com/docs/titan/1.0.0/getting-started.html">Guide de démarrage</a></p>
+<h2>Installation de Java 8</h2>
+<p><a href="https://doc.ubuntu-fr.org/java_proprietaire">Sur Ubuntu</a></p>
+<p>puis configuration de cette version par défaut :</p>
+<div class="highlight"><pre>    sudo update-alternatives --config java
+</pre></div>
+
+
+<h2>Installation de Titan</h2>
+<p><a href="https://github.com/thinkaurelius/titan/wiki/Downloads">Téléchargement</a></p>
+<div class="highlight"><pre>    $ unzip titan-1.0.0-hadoop1.zip
+    Archive:  titan-1.0.0-hadoop1.zip
+    creating: titan-1.0.0-hadoop1/
+    ...
+    $ cd titan-1.0.0-hadoop1
+    $ bin/gremlin.sh
+
+             \,,,/
+             (o o)
+    -----oOOo-(3)-oOOo-----
+    09:12:24 INFO  org.apache.tinkerpop.gremlin.hadoop.structure.HadoopGraph  - HADOOP_GREMLIN_LIBS is set to: /usr/local/titan/lib
+    plugin activated: tinkerpop.hadoop
+    plugin activated: aurelius.titan
+    gremlin&gt;
+</pre></div>
+
+
+<h2>Initialisation d'une base sur un backend BerkeleyDB</h2>
+<div class="highlight"><pre>        gremlin&gt; graph = TitanFactory.open(&#39;conf/titan-berkeleyje-es.properties&#39;)
+        ==&gt;standardtitangraph[berkeleyje:../db/berkeley]
+        gremlin&gt; GraphOfTheGodsFactory.load(graph)
+        ==&gt;null
+        gremlin&gt; g = graph.traversal()
+        ==&gt;graphtraversalsource[standardtitangraph[berkeleyje:../db/berkeley], standard]
+</pre></div>
+
+
+<h2>Initialisation d'une base sur un backend Cassandra</h2>
+<p>Note : Titan 1.0.0 semble compatible avec Cassandra 2.X <a href="http://www.datastax.com/2015/03/qa-cassandra-and-titandb-insights-into-datastaxs-graph-strategy">ref</a>.</p>
+<p>Une version de cassandra et d'elasticsearch est fournie avec le téléchargement de Titan.</p>
+<p>On les démarre :</p>
+<div class="highlight"><pre>        bin/cassandra -f
+        bin/elastisearch
+        gremlin&gt; graph = TitanFactory.open(&#39;conf/titan-cassandra-es.properties&#39;)
+            ==&gt;standardtitangraph[cassandrathrift:[127.0.0.1]]
+        gremlin&gt; GraphOfTheGodsFactory.load(graph)
+            ==&gt;null
+        gremlin&gt; g = graph.traversal()
+            ==&gt;graphtraversalsource[standardtitangraph[cassandrathrift:[127.0.0.1]], standard]
+</pre></div>                </article>
+            </aside><!-- /#featured -->
+        <section id="extras" class="body">
+                <div class="blogroll">
+                        <h2>blogroll</h2>
+                        <ul>
+                            <li><a href="http://getpelican.com/">Pelican</a></li>
+                            <li><a href="http://python.org/">Python.org</a></li>
+                            <li><a href="http://jinja.pocoo.org/">Jinja2</a></li>
+                            <li><a href="#">You can modify those links in your config file</a></li>
+                        </ul>
+                </div><!-- /.blogroll -->
+                <div class="social">
+                        <h2>social</h2>
+                        <ul>
+                            <li><a href="http://danc.github.io/feeds/all.atom.xml" type="application/atom+xml" rel="alternate">atom feed</a></li>
+
+                            <li><a href="#">You can add links in your config file</a></li>
+                            <li><a href="#">Another social link</a></li>
+                        </ul>
+                </div><!-- /.social -->
+        </section><!-- /#extras -->
+
+        <footer id="contentinfo" class="body">
+                <address id="about" class="vcard body">
+                Proudly powered by <a href="http://getpelican.com/">Pelican</a>, which takes great advantage of <a href="http://python.org">Python</a>.
+                </address><!-- /#about -->
+
+                <p>The theme is by <a href="http://coding.smashingmagazine.com/2009/08/04/designing-a-html-5-layout-from-scratch/">Smashing Magazine</a>, thanks!</p>
+        </footer><!-- /#contentinfo -->
+
+</body>
+</html>
