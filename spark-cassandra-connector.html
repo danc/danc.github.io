@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+      <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="canonical" href="http://danc.github.io/spark-cassandra-connector.html" />
+
+    <title>  Don't Panic &mdash; Spark Cassandra Connector
+</title>
+
+
+
+
+    <link rel="stylesheet" href="http://danc.github.io/theme/css/style.css">
+
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+      <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+
+    <meta name="author" content="Daniel">
+    <meta name="description" content="Plein de buzzwords ! Le challenge du jour était de commencer à mettre en place toutes ces jolies briques prises séparément pour commencer à se faire une idée précise de comment faire du bigdata en dehors de hadoop, avec : une base de donnée noSQL répartie (Cassandra) un framework de requêtage (Spark ...">
+  <meta name="tags" contents="scala, spark, cassandra, bigdata, ">
+</head>
+
+<body>
+<header class="header">
+  <div class="container">
+    <div class="header-inner">
+      <h1 class="header-name">
+        <a class="nodec" href="http://danc.github.io">Don't Panic</a>
+      </h1>
+      <h3 class="header-text"></h3>
+      <ul class="header-menu list-inline">
+          <li><a class="nodec icon-github" href="https://github.com/danc"></a></li>
+          <li><a class="nodec icon-twitter" href="https://twitter.com/tintouli"></a></li>
+      </ul>
+    </div>
+  </div>
+</header> <!-- /.header -->  <div class="container">
+  <div class="post full-post">
+    <h1 class="post-title">
+      <a href="/spark-cassandra-connector.html" title="Permalink to Spark Cassandra Connector">Spark Cassandra Connector</a>
+    </h1>
+    <ul class="list-inline">
+      <li class="post-date">
+        <a class="text-muted" href="/spark-cassandra-connector.html" title="2015-05-07T00:00:00+02:00">jeu. 07 mai 2015</a>
+      </li>
+      <li class="muted">&middot;</li>
+      <li class="post-category">
+        <a href="http://danc.github.io/category/misc.html">misc</a>
+      </li>
+        <li class="muted">&middot;</li>
+        <li>
+            <a href="http://danc.github.io/tag/scala.html">scala</a>,             <a href="http://danc.github.io/tag/spark.html">spark</a>,             <a href="http://danc.github.io/tag/cassandra.html">cassandra</a>,             <a href="http://danc.github.io/tag/bigdata.html">bigdata</a>        </li>
+    </ul>
+    <div class="post-content">
+      <p>Plein de buzzwords !</p>
+<p>Le challenge du jour était de commencer à mettre en place toutes ces jolies briques prises séparément pour commencer à se faire une idée précise de comment faire du bigdata en dehors de hadoop, avec :</p>
+<ul>
+<li>une base de donnée noSQL répartie (Cassandra)</li>
+<li>un framework de requêtage (Spark)  : dispose aussi de librairies SQL-like, d'algorithmes de machine learning, de capacités de temps réel, ...</li>
+</ul>
+<p>Comme j'ai des ressources limitées, je fais tout tourner en local, pas de config de prod pour le moment.</p>
+<h1>Mise en place de Cassandra</h1>
+<p>Pour cela j'ai suivi un bon <a href="https://academy.datastax.com/courses/installing-and-configuring-cassandra">tutoriel de Datastax</a> (au passage leur cours sur l'architecture Cassandra est excellent, pour maîtriser les concepts de base)</p>
+<p>Au final, démarrage de cassandra en local :</p>
+<div class="highlight"><pre>  cassandra/bin/cassandra -f
+</pre></div>
+
+
+<p>Appel d'un shell interactif de programmation CQL  (language de requêtage de type SQL, mais sans jointures, etc...). Pour les gens pressés, ce genre de requêtage avancé, non disponible en général dans les bases noSQL, se fera justement avec Spark ou SparkSQL.</p>
+<div class="highlight"><pre>  cassandra/bin/cqlsh
+
+  #Quelques commandes CQL :
+  DESCRIBE keyspaces;
+
+    CREATE KEYSPACE DCO WITH REPLICATION = {&#39;class&#39;: &#39;SimpleStrategy&#39; , &#39;replication_factor&#39;: 1};
+
+    use DCO;
+
+    CREATE TABLE users (
+      user_id int PRIMARY KEY, 
+      fname text, 
+      lname text
+    );
+
+    INSERT INTO users (user_id,  fname, lname) 
+      VALUES (1745, &#39;john&#39;, &#39;smith&#39;);
+    INSERT INTO users (user_id,  fname, lname) 
+      VALUES (1744, &#39;john&#39;, &#39;doe&#39;);
+    INSERT INTO users (user_id,  fname, lname) 
+      VALUES (1746, &#39;john&#39;, &#39;smith&#39;);
+</pre></div>
+
+
+<h1>Mise en place de Spark</h1>
+<p>Relativement simple, en partant du <a href="http://spark.apache.org/downloads.html">site officiel</a>, on arrive à récupérer une version prête à tourner, il suffit de décompresser le .tgz fourni (mais vous pouvez vous le contruire à partir des sources, bien sûr ...)</p>
+<p>pour ma part, j'ai pris la version spark-1.3.0-bin-hadoop2.4.tgz</p>
+<p>Lancement d'un shell interactif (en scala) :</p>
+<div class="highlight"><pre> bin/spark-shell
+</pre></div>
+
+
+<p>Lancement d'un shell interactif (en python) :</p>
+<div class="highlight"><pre> bin/pyspark
+</pre></div>
+
+
+<p>Il est possible d'invoquer les librairies spark en Java, bien sûr.</p>
+<h1>Connecteur Spark-Cassandra</h1>
+<p>Jusque là, pas de difficulté particulière pour  mettre en place les briques de base. 
+Spark ne possède pas par défaut d'interface native avec des bases de donnée. Un connecteur est développé par Datastax, qui permet de fournir les outils de base pour le big Data, sans focément se reposer sur une infrastructure de type hadoop.</p>
+<p>Le principe de mise en oeuvre du connecteur spark-cassandra est simple : on appelle spark-shell en lui fournissant des librairies (.jar) supplémentaires permettant d'accéder à une base de type cassandra. ( <a href="Exemple ici">http://christopher-batey.blogspot.fr/2015/01/spark-cassandra-basics-connecting-to.html</a>)</p>
+<p>Sauf que après plusieurs essais avec diverses versions récupérés pré-compilées, des erreurs lors de l'invocation de la librairie laissaient entendre qu'il manquait toujours une dépendance, ou que la version de telle ou telle brique n'était pas conforme.
+Après beaucoup d'essais/erreur,  (y compris en essayant d'utiliser DSE Datastax Enterprise, qui est censé intégrer tout cela, mais que je n'ai pas pris le temps de faire fonctionner correctement),  je laisse tomber cette piste, et reviens aux fondamentaux des briques opensources :</p>
+<p><em>La recompilation</em> !</p>
+<p>La page du projet qui m'a permis d'avancer :</p>
+<p>https://github.com/datastax/spark-cassandra-connector/blob/master/doc/13_spark_shell.md</p>
+<p>En gros, récupération du source, téléchargement des dépendances (merci les proxys d'entreprise ...), installation des outils de compilation java que je n'avais pas encore (merci Ubuntu !), et au bout d'un moment, le message de confirmation de la compilation, et les beaux .jar tous neufs disponibles sous spark-cassandra-connector/target/scala-2.10</p>
+<p>Lancement du spark-shell :</p>
+<div class="highlight"><pre>                bin/spark-shell --jars /home/daniel/spark-cassandra-connector-master/spark-cassandra-connector/target/scala-2.10/spark-cassandra-connector-assembly-1.3.0-SNAPSHOT.jar,/home/daniel/spark-cassandra-connector-master/spark-cassandra-connector-java/target/scala-2.10/spark-cassandra-connector-java-assembly-1.3.0-SNAPSHOT.jar --conf spark.cassandra.connection.host=127.0.0.1
+</pre></div>
+
+
+<p>une fois le prompt scala&gt; disponible :</p>
+<div class="highlight"><pre>                <span class="kn">import</span> <span class="nn">com.datastax.spark.connector._</span> <span class="o">//</span><span class="n">Imports</span> <span class="n">basic</span> <span class="n">rdd</span> <span class="n">functions</span>
+                <span class="kn">import</span> <span class="nn">com.datastax.spark.connector.cql._</span> <span class="o">//</span><span class="p">(</span><span class="n">Optional</span><span class="p">)</span> <span class="n">Imports</span> <span class="n">java</span> <span class="n">driver</span> <span class="n">helper</span> <span class="n">functions</span>
+                <span class="n">val</span> <span class="n">rdd</span><span class="o">=</span><span class="n">sc</span><span class="o">.</span><span class="n">cassandraTable</span><span class="p">(</span><span class="s">&quot;dco&quot;</span><span class="p">,</span> <span class="s">&quot;table1&quot;</span><span class="p">)</span>
+                <span class="n">rdd</span><span class="o">.</span><span class="n">toArray</span><span class="o">.</span><span class="n">foreach</span><span class="p">(</span><span class="n">println</span><span class="p">)</span>
+</pre></div>
+
+
+<p>On accède aux données d'une table précédemment créé sous cassandra / CQL !</p>
+<p>Il est possible d'invoquer directement des commandes CQL depuis spark, bien sûr :</p>
+<div class="highlight"><pre>                val c = CassandraConnector(sc.getConf)
+                c.withSessionDo ( session =&gt; session.execute(&quot;CREATE KEYSPACE test WITH replication={&#39;class&#39;:&#39;SimpleStrategy&#39;, &#39;replication_factor&#39;:1}&quot;))
+                c.withSessionDo ( session =&gt; session.execute(&quot;CREATE TABLE test.fun (k int PRIMARY KEY, v int)&quot;))
+                sc.parallelize(1 to 100).map( x =&gt; (x,x)).saveToCassandra(&quot;test&quot;,&quot;fun&quot;)
+                sc.cassandraTable(&quot;test&quot;,&quot;fun&quot;).take(3)
+</pre></div>
+
+
+<p>Voilà pour une première mise en place, on va pouvoir faire des choses plus complexes ... (à suivre)</p>
+    </div>
+  </div>
+  <hr class="separator">
+  <div class="col-md-8 col-md-offset-2">
+  </div>
+  </div>
+<footer class="footer">
+  <div class="container">
+    <p class="text-center">
+      Daniel, <a href="" target="_blank"></a> unless otherwise noted.
+    </p>
+    <div class="text-center">
+      Generated by <a href="http://getpelican.com" target="_blank">Pelican</a> with the <a href="http://github.com/nairobilug/pelican-alchemy">alchemy</a> theme.
+    </div>
+  </div>
+</footer> <!-- /.footer -->
+  <script src="http://danc.github.io/theme/js/jquery.min.js"></script>
+  <script src="http://danc.github.io/theme/js/bootstrap.min.js"></script>
+</body> <!-- 42 -->
+
+</html>

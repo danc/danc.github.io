@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+      <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="canonical" href="http://danc.github.io/passer-un-projet-flex-sous-maven-sonar.html" />
+
+    <title>  Don't Panic &mdash; Passer un projet Flex sous maven + sonar
+</title>
+
+
+
+
+    <link rel="stylesheet" href="http://danc.github.io/theme/css/style.css">
+
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+      <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+
+    <meta name="author" content="Daniel">
+    <meta name="description" content="Après la mise en place d’un proxy nexus ( notes d’installation sur le wiki ), l’étape suivante consiste à tester la mise en place de maven + sonar sur un projet Flex existant. On suppose que le poste développeur est configuré pour pointer sur le nexus local . les remarques suivantes ...">
+  <meta name="tags" contents="flex, maven, sonar, nexus, ">
+</head>
+
+<body>
+<header class="header">
+  <div class="container">
+    <div class="header-inner">
+      <h1 class="header-name">
+        <a class="nodec" href="http://danc.github.io">Don't Panic</a>
+      </h1>
+      <h3 class="header-text"></h3>
+      <ul class="header-menu list-inline">
+          <li><a class="nodec icon-github" href="https://github.com/danc"></a></li>
+          <li><a class="nodec icon-twitter" href="https://twitter.com/tintouli"></a></li>
+      </ul>
+    </div>
+  </div>
+</header> <!-- /.header -->  <div class="container">
+  <div class="post full-post">
+    <h1 class="post-title">
+      <a href="/passer-un-projet-flex-sous-maven-sonar.html" title="Permalink to Passer un projet Flex sous maven + sonar">Passer un projet Flex sous maven + sonar</a>
+    </h1>
+    <ul class="list-inline">
+      <li class="post-date">
+        <a class="text-muted" href="/passer-un-projet-flex-sous-maven-sonar.html" title="2010-12-07T00:00:00+01:00">mar. 07 décembre 2010</a>
+      </li>
+      <li class="muted">&middot;</li>
+      <li class="post-category">
+        <a href="http://danc.github.io/category/misc.html">misc</a>
+      </li>
+        <li class="muted">&middot;</li>
+        <li>
+            <a href="http://danc.github.io/tag/flex.html">flex</a>,             <a href="http://danc.github.io/tag/maven.html">maven</a>,             <a href="http://danc.github.io/tag/sonar.html">sonar</a>,             <a href="http://danc.github.io/tag/nexus.html">nexus</a>        </li>
+    </ul>
+    <div class="post-content">
+      <p>Après la mise en place d’un proxy nexus ( <a href="/wiki/#Installation_nexus">notes d’installation sur le
+wiki</a> ), l’étape suivante consiste à tester
+la mise en place de maven + sonar sur un projet Flex existant.</p>
+<p>On suppose que le poste développeur est configuré pour <a href="/slide/maven-nexus-sonar/#11">pointer sur le
+nexus local</a> .</p>
+<p>les remarques suivantes porteront sur les étapes principales pour que le
+projet compile sous maven :<br />
+<em> affinage du pom.xml<br />
+</em> déclaration des repositories/artifacts nécessaires dans le nexus</p>
+<p>On ne gèrera pas tous les détails propres au projet (paramètres, i18n,
+…). L’objectif est que les commandes suivantes passent :</p>
+<div class="highlight"><pre> mvn compile  
+ mvn package  
+ mvn sonar:sonar
+</pre></div>
+
+
+<h1>Organisation du projet</h1>
+<p>On suppose que le projets est composé de trois modules , un en java, les
+deux autres en flex.</p>
+<p>La première étape consiste à créer un pom.xml à la racine de chacun de
+ces trois modules.<br />
+On les mettra au point séparément, avant de déclarer un pom global au
+projet qui ne fera que référencer chacun des modules.</p>
+<p>Pour les modules Flex, on utilisera le modèle de pom généré par un
+archetype flex-mojos :</p>
+<div class="highlight"><pre>mvn archetype:generate
+
+-DarchetypeRepository=http://repository.sonatype.org/content/groups/flexgroup/  
+ -DarchetypeGroupId=org.sonatype.flexmojos  
+ -DarchetypeArtifactId=flexmojos-archetypes-application  
+ -DarchetypeVersion=3.0.0
+</pre></div>
+
+
+<p>Le fichier xml ainsi généré sera du genre:</p>
+<div class="highlight"><pre><span class="nt">&lt;project</span> <span class="na">xmlns=</span><span class="s">&quot;http://maven.apache.org/POM/4.0.0&quot;</span> 
+    <span class="na">xmlns:xsi=</span><span class="s">&quot;http://www.w3.org/2001/XMLSchema-instance&quot;</span>
+    <span class="na">xsi:schemaLocation=</span><span class="s">&quot;http://maven.apache.org/POM/4.0.0 </span>
+<span class="s">        http://maven.apache.org/maven-v4_0_0.xsd&quot;</span><span class="nt">&gt;</span>  
+ <span class="nt">&lt;modelVersion&gt;</span>4.0.0<span class="nt">&lt;/modelVersion&gt;</span>  
+ <span class="nt">&lt;parent&gt;</span>  
+ <span class="nt">&lt;groupId&gt;</span>org.sonatype.flexmojos<span class="nt">&lt;/groupId&gt;</span>  
+ <span class="nt">&lt;artifactId&gt;</span>flexmojos-flex-super-pom<span class="nt">&lt;/artifactId&gt;</span>  
+ <span class="nt">&lt;version&gt;</span>3.0.0<span class="nt">&lt;/version&gt;</span>  
+ <span class="nt">&lt;/parent&gt;</span>
+
+ <span class="nt">&lt;groupId&gt;</span>YOURPROJECT<span class="nt">&lt;/groupId&gt;</span>  
+ <span class="nt">&lt;artifactId&gt;</span>YOURARTIFACT<span class="nt">&lt;/artifactId&gt;</span>  
+ <span class="nt">&lt;version&gt;</span>1.0-SNAPSHOT<span class="nt">&lt;/version&gt;</span>  
+ <span class="nt">&lt;packaging&gt;</span>swf<span class="nt">&lt;/packaging&gt;</span>
+
+ <span class="nt">&lt;name&gt;</span>Test Flex Maven<span class="nt">&lt;/name&gt;</span>  
+ <span class="nt">&lt;/project&gt;</span>
+</pre></div>
+
+
+<p>L’appel de maven nous permet de trouver pas à pas les modifications à
+apporter à la structure du code :</p>
+<ul>
+<li>respect de l’arborescenve maven attendue pour un projet flex (
+src/main/flex )  </li>
+<li>déclaration des dépendences</li>
+</ul>
+<p>Par exemple pour un projet Flex qui dépendait d’une librairie Cairngorm
+particulière :</p>
+<div class="highlight"><pre><span class="nt">&lt;dependencies&gt;</span>  
+ <span class="nt">&lt;dependency&gt;</span>  
+ <span class="nt">&lt;groupId&gt;</span>com.adobe.cairngorm.business<span class="nt">&lt;/groupId&gt;</span>  
+ <span class="nt">&lt;artifactId&gt;</span>ServiceLocator<span class="nt">&lt;/artifactId&gt;</span>  
+ <span class="nt">&lt;version&gt;</span>2.2.1<span class="nt">&lt;/version&gt;</span>  
+ <span class="nt">&lt;type&gt;</span>swc<span class="nt">&lt;/type&gt;</span>  
+ <span class="nt">&lt;scope&gt;</span>compile<span class="nt">&lt;/scope&gt;</span>  
+ <span class="nt">&lt;/dependency&gt;</span>  
+<span class="nt">&lt;/dependencies&gt;</span>
+</pre></div>
+
+
+<p>On peut noter que par rapport à un projet <strong>ant</strong>, <strong>maven</strong> se contente
+de déclarer les dépendances dont le projet a besoin, alors que <strong>ant</strong> a
+besoin de décrire en détail la façon dont les dépendances doivent être
+prises en compte.<br />
+On verra plus loin comment prendre en compte effectivement une librairie
+externe dans notre repository.</p>
+<h1>Modifications des pom.xml</h1>
+<p>Le module java était déjà “mavenisé”, il comportait déjà un pom.xml<br />
+On pourra toutefois le simplifier en supprimant les déclarations des
+repositories, qui sont dans notre optique gérés par nexus.</p>
+<p>|règle #1 : alléger au maximum le pom.xml, en remontant un maximum
+d’informations dans les poms parents, ou dans le repository manager|</p>
+<h1>Déclarer un artifact dans le repository</h1>
+<p>On a vu plus haut que les dépendances étaient simplement déclarées dans
+le pom.xml. Ces dépendances peuvent<br />
+<em> appartenir à un repository maven identifié<br />
+</em> être fournies en tant que librairie autonome (.jar, .swc, …)</p>
+<p>Dans le premier cas, on peut déclarer le repository correspondant dans
+le pom.xml, mais en application de la règle #1, on préférera laisser ce
+travail au gestionnaire de repository local (nexus dans notre cas).<br />
+Cela permet d’appliquer une politique cohérente de gestion des
+dépendances au niveau de l’entreprise, au détriment toutefois d’une
+certaine souplesse laissée aux développeurs.<br />
+Si un projet a besoin d’une librairie particulière ou d’un repository
+non encode géré par nexus, l’équipe devra s’adresser au gestionnaire de
+nexus pour qu’il donne accès aux repository/librairies concernées pour
+le projet.</p>
+<p>On ne rentrera pas ici dans la gestion complète d’un nexus par exemple,
+mais on décrira simplement l’ajoutd ’une librairie Flex .swc dans nexus.
+La librairie demandée (Cairngorm_2.2.1.swc) n’est pas référencée dans
+un repository maven connu : on va donc la déclarer explicitement dans
+nexus, la rendant ainsi potentiellement disponible à tous les projets.</p>
+<dl>
+<dt>Pour satisfaire la dépendance décrite plus haut (le projet utilise la</dt>
+<dt>classe ServiceLocator dans le package com.adobe.cairngorm.business, le</dt>
+<dt>tout étant fourni par un fichier Cairngorm_2.2.1.swc) , on ajoutera</dt>
+<dt>dans le repository ’third party’ (Repository/third party/Artifact</dt>
+<dt>upload) de nexus le fichier swc, accompagné de la description suivante</dt>
+<dd>* groupId (com.adobe.cairngorm.business)<br />
+* artifactId (ServiceLocator)<br />
+* version (2.2.1)<br />
+* type (swc)</dd>
+</dl>
+<p><A HREF="/img/nexus-upload-artifact.jpg" class="highslide" onclick="return hs.expand(this)">Copie
+d’écran correspondante à l’ajout manuel d’un artifact</A></p>
+<p>Il est aussi possible d’affectuer cette manipulation en ligne de
+commande avec maven:</p>
+<div class="highlight"><pre>mvn deploy:deploy-file  
+ -DgroupId=com.adobe.cairngorm.business  
+ -DartifactId=ServiceLocator  
+ -Dversion=2.2.1  
+ -Dpackaging=swc  
+ -Dfile=/path/to/Cairngorm\_2.2.1.swc  
+ -Durl=http://nexus-rennes.sii.fr/content/repositories/thirdparty  
+ -DrepositoryId=thirdparty
+</pre></div>
+
+
+<p>Il est alors nécessaire de demander sous nexus une réindexation du
+repository (thirdparty et public, qui inclut par défaut thirdparty),
+afin que les nouveaux artifacts soient effectivement accessibles aux
+équipes qui dont la configuration maven pointe sur le répoertoire public
+(http://nexus-rennes.sii.fr/content/groups/public/).</p>
+<p>On peut constater que l’on peut gérer autant de repositories maven que
+nécessaires et attribuer des accès différenciés en fonction des droits,
+des besoins des équipes, …</p>
+<h1>Un bilan temporaire</h1>
+<p>A ce niveau, chaque module passe sous maven, une fois les dépendances
+correctement décrites et les repositories mis à jour (ajout d’artifacts
+manquants, ajout de nouveaux repositories + réindexation).</p>
+<p>Dans la mesure ou sonar est installé (en local ou dans le réseau de
+l’entreprise), <strong><a href="http://docs.codehaus.org/display/SONAR/Flex+Plugin">avec le plugin
+Flex</a> installé</strong><br />
+ on peut déjà invoquer sonar à partir de maven :</p>
+<div class="highlight"><pre>mvn sonar:sonar
+</pre></div>
+
+
+<p>Les projets flex, pour bénéficier d’outils d’analyse propres à Flex, ont
+besoin de déclarer quelques propriétés dans le pom.xml, exemple :<br />
+<em> déclaration du langage pour que sonar détermine les règles
+syntaxiques à appliquer au code<br />
+</em> paramètres d’analyse<br />
+* gestion du code source dans Sonar</p>
+<div class="highlight"><pre> <span class="nt">&lt;properties&gt;</span>  
+ <span class="nt">&lt;sonar.language&gt;</span>flex<span class="nt">&lt;/sonar.language&gt;</span>  
+ <span class="nt">&lt;sonar.dynamicAnalysis&gt;</span>false<span class="nt">&lt;/sonar.dynamicAnalysis&gt;</span>  
+ <span class="nt">&lt;sonar.phase&gt;</span>generate-sources<span class="nt">&lt;/sonar.phase&gt;</span>  
+ <span class="nt">&lt;/properties&gt;</span>
+</pre></div>
+
+
+<p>Et le résultat :</p>
+<p><A HREF="/img/flex-sonar.jpg" class="highslide" onclick="return hs.expand(this)">Ecran
+sonar principal : analyse d’un projet Flex</A></p>
+<p><a href="http://docs.codehaus.org/display/SONAR/Collect+data">Plus de détails sur les paramètres
+sonar</a></p>
+<h1>La suite (et fin ?)</h1>
+<p>Il est enfin utile de regrouper les différents modules de l’application
+en créant un pom.xml commun à tous les modules qui va les référencer de
+la manière suivante :</p>
+<div class="highlight"><pre> <span class="nt">&lt;modules&gt;</span>  
+ <span class="nt">&lt;module&gt;</span>flex-gui<span class="nt">&lt;/module&gt;</span>  
+ <span class="nt">&lt;module&gt;</span>java-service<span class="nt">&lt;/module&gt;</span>  
+ <span class="nt">&lt;module&gt;</span>web-app<span class="nt">&lt;/module&gt;</span>  
+ <span class="nt">&lt;/modules&gt;</span>
+</pre></div>
+
+
+<p>On suppose ici que les modules se trouvent dans les sous répertoires
+immédiats de l’endroit où se trouve le pom.xml parent. Il ne s’agit pas
+de dépendances, (sans quoi on aurait utilisé la notation dédiée), mais
+bien de modules cohérents pour un même projet.<br />
+Rien n’empêche d’imaginer qu’à terme un module devienne une librairie
+indépendante utilisée par plusieurs projets.</p>
+<p>Chaque module référencé devra quand à lui pointer sur son pom parent :</p>
+<div class="highlight"><pre> <span class="nt">&lt;parent&gt;</span>  
+ <span class="nt">&lt;groupId&gt;</span>fr.sii.projet-multi-modules<span class="nt">&lt;/groupId&gt;</span>  
+ <span class="nt">&lt;artifactId&gt;</span>projet-multi-modules<span class="nt">&lt;/artifactId&gt;</span>  
+ <span class="nt">&lt;version&gt;</span>1.0-SNAPSHOT<span class="nt">&lt;/version&gt;</span>  
+ <span class="nt">&lt;/parent&gt;</span>
+</pre></div>
+
+
+<p>On peut noter que seule la référence groupe/artifact/version est
+nécessaire, et non son chemin relatif.</p>
+<p>On pourra profiter de l’occasion pour remonter un maximum d’informations
+communes vers le pom parent (version du logiciel en tant que <em>property</em>,
+gestion des dépendances communes ou <em>dependencyManagement</em> , … )<br />
+Afin de ne pas avoir deux parents dans les projets Flex, il a été
+nécessaire de remonter la définition suivante dans le pom parent [1] :</p>
+<div class="highlight"><pre> <span class="nt">&lt;parent&gt;</span>  
+ <span class="nt">&lt;groupId&gt;</span>org.sonatype.flexmojos<span class="nt">&lt;/groupId&gt;</span>  
+ <span class="nt">&lt;artifactId&gt;</span>flexmojos-flex-super-pom<span class="nt">&lt;/artifactId&gt;</span>  
+ <span class="nt">&lt;version&gt;</span>3.0.0<span class="nt">&lt;/version&gt;</span>  
+ <span class="nt">&lt;/parent&gt;</span>
+</pre></div>
+
+
+<p>Cette définition permet de définir le projet en tant que projet flex, et
+d’utiliser les plugins maven nécessaires. Le fait de le remonter dans le
+pom père ne semble pas avoir d’effet négatif sur le module java.</p>
+<p>[1] pas de multi héritage dans maven ?</p>
+    </div>
+  </div>
+  <hr class="separator">
+  <div class="col-md-8 col-md-offset-2">
+  </div>
+  </div>
+<footer class="footer">
+  <div class="container">
+    <p class="text-center">
+      Daniel, <a href="" target="_blank"></a> unless otherwise noted.
+    </p>
+    <div class="text-center">
+      Generated by <a href="http://getpelican.com" target="_blank">Pelican</a> with the <a href="http://github.com/nairobilug/pelican-alchemy">alchemy</a> theme.
+    </div>
+  </div>
+</footer> <!-- /.footer -->
+  <script src="http://danc.github.io/theme/js/jquery.min.js"></script>
+  <script src="http://danc.github.io/theme/js/bootstrap.min.js"></script>
+</body> <!-- 42 -->
+
+</html>

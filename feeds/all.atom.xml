@@ -1,5 +1,131 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>Don't Panic</title><link href="http://danc.github.io/" rel="alternate"></link><link href="http://danc.github.io/feeds/all.atom.xml" rel="self"></link><id>http://danc.github.io/</id><updated>2016-05-24T00:00:00+02:00</updated><entry><title>Premier contact avec Titan DB</title><link href="http://danc.github.io/premier-contact-avec-titan-db.html" rel="alternate"></link><updated>2016-05-24T00:00:00+02:00</updated><author><name>Daniel</name></author><id>tag:danc.github.io,2016-05-24:premier-contact-avec-titan-db.html</id><summary type="html">&lt;p&gt;Quelques notes sur la mise en place de &lt;a href="http://titan.thinkaurelius.com/"&gt;Titan&lt;/a&gt;.&lt;/p&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Don't Panic</title><link href="http://danc.github.io/" rel="alternate"></link><link href="http://danc.github.io/feeds/all.atom.xml" rel="self"></link><id>http://danc.github.io/</id><updated>2016-06-07T00:00:00+02:00</updated><entry><title>Titan DB, suite</title><link href="http://danc.github.io/titan-db-suite.html" rel="alternate"></link><updated>2016-06-07T00:00:00+02:00</updated><author><name>Daniel</name></author><id>tag:danc.github.io,2016-06-07:titan-db-suite.html</id><summary type="html">&lt;h2&gt;Définition du modèle&lt;/h2&gt;
+&lt;p&gt;On peut définir les noms des relations entre noeuds, avec sa cardinalité, les propriétés, ...&lt;/p&gt;
+&lt;p&gt;Je l'interprète comme une possibilité pour la base d'optimiser les requêtes futures (traversée de graphe) sur la base des noms de relations entre noeuds.&lt;/p&gt;
+&lt;h3&gt;Noms des relations&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;    mgmt = graph.openManagement()
+    //Relations from Customer
+    holds = mgmt.makeEdgeLabel(&amp;#39;holds&amp;#39;).multiplicity(ONE2MANY).make()
+    isLocated = mgmt.makeEdgeLabel(&amp;#39;isLocated&amp;#39;).multiplicity(MULTI).make()
+    contracts = mgmt.makeEdgeLabel(&amp;#39;contracts&amp;#39;).multiplicity(ONE2MANY).make()
+    //Relations from Router
+    isConnectedTo = mgmt.makeEdgeLabel(&amp;#39;isConnectedTo&amp;#39;).multiplicity(MULTI).make()
+    isLoadbalancedBy = mgmt.makeEdgeLabel(&amp;#39;isLoadbalancedBy&amp;#39;).multiplicity(ONE2MANY).make()
+    isCascadedBy = mgmt.makeEdgeLabel(&amp;#39;isCascadedBy&amp;#39;).multiplicity(ONE2MANY).make()
+    isAssociatedTo = mgmt.makeEdgeLabel(&amp;#39;isAssociatedTo&amp;#39;).multiplicity(MANY2ONE).make()
+    //Relations from IS
+    isComposedOf = mgmt.makeEdgeLabel(&amp;#39;isComposedOf&amp;#39;).multiplicity(ONE2MANY).make()
+    isInstalledOn = mgmt.makeEdgeLabel(&amp;#39;isInstalledOn&amp;#39;).multiplicity(MANY2ONE).make()
+    dependsOn = mgmt.makeEdgeLabel(&amp;#39;dependsOn&amp;#39;).multiplicity(MULTI).make()
+    //Relations from SO
+    isSubscribedBy = mgmt.makeEdgeLabel(&amp;#39;isSubscribedBy&amp;#39;).multiplicity(MANY2ONE).make()
+    isProvisionedIn = mgmt.makeEdgeLabel(&amp;#39;isProvisionedIn&amp;#39;).multiplicity(MULTI).make()
+    isDeliveredOn = mgmt.makeEdgeLabel(&amp;#39;isDeliveredOn&amp;#39;).multiplicity(MANY2ONE).make()
+    isRelatedTo = mgmt.makeEdgeLabel(&amp;#39;isRelatedTo&amp;#39;).multiplicity(MANY2ONE).make()
+    isBilledTo = mgmt.makeEdgeLabel(&amp;#39;isBilledTo&amp;#39;).multiplicity(MANY2ONE).make()
+    contains = mgmt.makeEdgeLabel(&amp;#39;contains&amp;#39;).multiplicity(ONE2MANY).make()
+
+    mgmt.commit()
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h3&gt;Propriétés sur les noeuds&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;    mgmt = graph.openManagement()
+    tacid = mgmt.makePropertyKey(&amp;#39;tacid&amp;#39;).dataType(String.class).cardinality(Cardinality.SINGLE).make()
+    name = mgmt.makePropertyKey(&amp;#39;name&amp;#39;).dataType(String.class).cardinality(Cardinality.SINGLE).make()
+    mgmt.commit()
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Doit être unique dans le système :(pas de doublons entre différents labels ?).&lt;/p&gt;
+&lt;p&gt;Noms des propriétés et des relations sont des Relation Types ("Edge labels and property keys are jointly referred to as &lt;strong&gt;relation types&lt;/strong&gt;")&lt;/p&gt;
+&lt;p&gt;Lister les noms des relations (edges)&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;    mgmt.getRelationTypes(EdgeLabel.class)
+    ==&amp;gt;brother
+    ==&amp;gt;composedOf
+    ==&amp;gt;isCascading
+    ==&amp;gt;father
+    ==&amp;gt;mother
+    ==&amp;gt;battled
+    ==&amp;gt;lives
+    ==&amp;gt;pet
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Lister les nom des propriétés des noeuds (PropertyKey)&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;    mgmt.getRelationTypes(PropertyKey.class)
+    ==&amp;gt;name
+    ==&amp;gt;age
+    ==&amp;gt;time
+    ==&amp;gt;reason
+    ==&amp;gt;place
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h3&gt;Labels des noeuds (~ types d'objets)&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;    mgmt = graph.openManagement()
+    router = mgmt.makeVertexLabel(&amp;#39;Router&amp;#39;).make()
+    site = mgmt.makeVertexLabel(&amp;#39;Site&amp;#39;).make()
+    customer = mgmt.makeVertexLabel(&amp;#39;CustomerEntity&amp;#39;).make()
+    is = mgmt.makeVertexLabel(&amp;#39;InstalledService&amp;#39;).make()
+    so = mgmt.makeVertexLabel(&amp;#39;SubscribedOffer&amp;#39;).make()
+    mgmt.commit()
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h3&gt;Création d'un noeud avec label&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;    tst1 = graph.addVertex(label, &amp;#39;Router&amp;#39;) //Automatically opens a new transaction
+    tst1.property(&amp;quot;id&amp;quot;, &amp;quot;tst1-id&amp;quot;)
+    tst1.property(&amp;quot;name&amp;quot;, &amp;quot;this is my first test name&amp;quot;)
+    graph.tx().commit()
+
+    // fichier
+     is = new File(&amp;#39;.&amp;#39;, &amp;#39;router.csv&amp;#39;).newDataInputStream()
+     is.readLine() // header
+     while (line = is.readLine()) {
+        cols = line.split(&amp;quot;;&amp;quot;)
+        if (g.V().has(&amp;#39;name&amp;#39;, cols[0])) { 
+        // router already declared
+        } else 
+        { // new Router
+        r = graph.addVertex(label, &amp;#39;Router&amp;#39;)
+        r.property(&amp;quot;name&amp;quot;, cols[0])
+        r.property(&amp;quot;tacid&amp;quot;, &amp;quot;10-&amp;quot;+cols[0])
+        }
+     }
+     is.close()
+
+     is2 = new File(&amp;#39;.&amp;#39;,&amp;#39;cust.csv&amp;#39;).newDataInputStream()
+     is2.readLine()
+     while (line = is2.readLine()) {
+        cols = line.split(&amp;#39;¤&amp;#39;)
+        if (g.V().has(&amp;#39;name&amp;#39;, cols[111])) { 
+        } else 
+        { 
+        c = graph.addVertex(label, &amp;#39;CustomerEntity&amp;#39;)
+        c.property(&amp;quot;name&amp;quot;, cols[111])
+        c.property(&amp;quot;tacid&amp;quot;, &amp;quot;10-&amp;quot;+cols[111])
+        }
+     }
+     is2.close()
+
+
+     g.tx().commit()
+     # https://academy.datastax.com/resources/getting-started-tinkerpop-and-gremlin
+     getOrCreate = { l, id -&amp;gt; g.V().has(&amp;#39;name&amp;#39;, id).tryNext().orElseGet { tmp = g.addV(label, l , &amp;#39;name&amp;#39;, id).next(); tmp.property(&amp;#39;tacid&amp;#39;, &amp;quot;10-&amp;quot;+id); tmp}}
+
+// indexation
+mgmt = graph.openManagement()
+name = mgmt.getPropertyKey(&amp;#39;name&amp;#39;)
+mgmt.buildIndex(&amp;#39;byNameComposite&amp;#39;, Vertex.class).addKey(name).buildCompositeIndex()
+mgmt.commit()
+//Wait for the index to become available
+mgmt.awaitGraphIndexStatus(graph, &amp;#39;byNameComposite&amp;#39;).call()
+// Reindex existing objects
+mgmt = graph.openManagement()
+mgmt.updateIndex(mgmt.getGraphIndex(&amp;#39;byNameComposite&amp;#39;), SchemaAction.REINDEX).get()
+mgmt.commit()
+&lt;/pre&gt;&lt;/div&gt;</summary><category term="bigdata"></category><category term="graph"></category></entry><entry><title>Premier contact avec Titan DB</title><link href="http://danc.github.io/premier-contact-avec-titan-db.html" rel="alternate"></link><updated>2016-05-24T00:00:00+02:00</updated><author><name>Daniel</name></author><id>tag:danc.github.io,2016-05-24:premier-contact-avec-titan-db.html</id><summary type="html">&lt;p&gt;Quelques notes sur la mise en place de &lt;a href="http://titan.thinkaurelius.com/"&gt;Titan&lt;/a&gt;.&lt;/p&gt;
 &lt;p&gt;&lt;a href="http://s3.thinkaurelius.com/docs/titan/1.0.0/getting-started.html"&gt;Guide de démarrage&lt;/a&gt;&lt;/p&gt;
 &lt;h2&gt;Installation de Java 8&lt;/h2&gt;
 &lt;p&gt;&lt;a href="https://doc.ubuntu-fr.org/java_proprietaire"&gt;Sur Ubuntu&lt;/a&gt;&lt;/p&gt;
@@ -49,4 +175,1149 @@
             ==&amp;gt;null
         gremlin&amp;gt; g = graph.traversal()
             ==&amp;gt;graphtraversalsource[standardtitangraph[cassandrathrift:[127.0.0.1]], standard]
-&lt;/pre&gt;&lt;/div&gt;</summary><category term="bigdata"></category><category term="graph"></category></entry></feed>
+&lt;/pre&gt;&lt;/div&gt;</summary><category term="bigdata"></category><category term="graph"></category></entry><entry><title>Veille Big Data</title><link href="http://danc.github.io/veille-big-data.html" rel="alternate"></link><updated>2016-04-03T00:00:00+02:00</updated><author><name>Daniel</name></author><id>tag:danc.github.io,2016-04-03:veille-big-data.html</id><summary type="html">&lt;p&gt;Vous pouvez suivre aux liens suivants ma veille sur le sujet Big Data :&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://tintouli.withknown.com/tag/bigdata"&gt;Veille Big Data&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://tintouli.withknown.com/tag/bigdata?_t=rss"&gt;Veille Big Data (flux RSS)&lt;/a&gt;&lt;/p&gt;</summary><category term="bigdata"></category></entry><entry><title>Spark, un framework polyvalent</title><link href="http://danc.github.io/spark-un-framework-polyvalent.html" rel="alternate"></link><updated>2015-06-19T00:00:00+02:00</updated><author><name>Daniel</name></author><id>tag:danc.github.io,2015-06-19:spark-un-framework-polyvalent.html</id><summary type="html">&lt;p&gt;Au début de l'ère du Big Data, vous disposiez de différentes bibliothèques pour réaliser diverses fonctions :&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;chargement des données (Sqoop)&lt;/li&gt;
+&lt;li&gt;Batches Map Reduce (via Pig)&lt;/li&gt;
+&lt;li&gt;Requêtage de type SQL (Hive)&lt;/li&gt;
+&lt;li&gt;Stream Processing&lt;/li&gt;
+&lt;li&gt;Machine Learning (Mahout)&lt;/li&gt;
+&lt;li&gt;...&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Différents langages et outils étaient nécessaires pour installer et mettre en oeuvre ces fonctionnalités.&lt;/p&gt;
+&lt;p&gt;De plus, le stockage de l'information était principalement envisagé sous HDFS, et la gestion de la répartition et l'ordonnacement des calculs par les frameworks Yarn et Zookeeper.&lt;/p&gt;
+&lt;p&gt;Spark vient bousculer cette immense ménagerie pleine d'animaux étranges, et propose d'autres options de gestion, de stockage, tout en assurant &lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;une possible continuité avec l'écosystème Hadoop (votre investissement n'est pas perdu), &lt;/li&gt;
+&lt;li&gt;mais en permettant désormais de s'en affranchir (on peut faire du Big Data sans Hadoop, contrairement à une idée communément répandue)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Le ticket d'entrée n'est pas très cher, et se rentabilise assez vite :&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Accessible via des APIs permettant la programmation en Scala, Java, Python&lt;/li&gt;
+&lt;li&gt;il donne accès à différentes librairies de traitement, &lt;/li&gt;
+&lt;li&gt;permet de faire du Map Reduce et plus, &lt;/li&gt;
+&lt;li&gt;du machine learning (tout Mahout bascule progressivement en Spark)&lt;/li&gt;
+&lt;li&gt;du traitement en streaming&lt;/li&gt;
+&lt;li&gt;SparkSQL remplace avantageusement Hive&lt;/li&gt;
+&lt;li&gt;SparkR (depuis la v1.4) se rapproche du monde des data analystes familiers du langage R&lt;/li&gt;
+&lt;li&gt;peut tourner en standalone (mise au point aisée), sur Yarn, Mesos, amazon EC2&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;L'implication récente d'IBM dans l'écosystème Spark donne davantage de gages à cette technologie, flexible, homogène, polyvalente.&lt;/p&gt;
+&lt;p&gt;Flink est une technologie très similaire en plein développement, (issu de recherche d'équipes berlinoises), qui semble offrir quelques avantages par rapport à Spark : à suivre, le passage de Spark à Flink ne devrait pas poser de gros problèmes (mêmes langages, principes similaires de traitement en RAM, avec un axe plus natif sur le streaming pour Flink).&lt;/p&gt;</summary><category term="bigdata"></category><category term="spark"></category><category term="hadoop"></category><category term="flink"></category></entry><entry><title>Transposition de données avec Talend</title><link href="http://danc.github.io/transposition-de-donnees-avec-talend.html" rel="alternate"></link><updated>2015-06-19T00:00:00+02:00</updated><author><name>Daniel</name></author><id>tag:danc.github.io,2015-06-19:transposition-de-donnees-avec-talend.html</id><summary type="html">&lt;p&gt;On trouve régulièrement dans les bases de données des enregistrements de structure :&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;    ID ; CLE ; VALEUR
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Exemple de jeu de données :&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;    ID1;ATTRIBUT1;VALEUR11
+    ID1;ATRRIBUT2;VALEUR21
+    ID2;ATTRIBUT1;VALEUR12
+    ID3;ATTRIBUT1;VALEUR31
+    ID3;ATRRIBUT2;VALEUR32
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;On souhaiterait obtenir une sorte de matrice transposée, pour un ID donné , la structure suivante :&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;    ID; ATTRIBUT1; ATTRIBUT2
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Exemple pour le même jeu de données :&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;    ID1;VALEUR11;VALEUR12
+    ID2;VALEUR21;
+    ID3;VALEUR31;VALEUR32
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Le composant Talend &lt;a href="https://help.talend.com/display/TalendOpenStudioforBigDataComponentsReferenceGuide520EN/13.41+tPivotToColumnsDelimited"&gt;tPivotToColumsDelimited&lt;/a&gt; permet exactement ce genre de transformation.&lt;/p&gt;
+&lt;p&gt;Curieusement, il force toutefois à récupérer la sortie dans un fichier plat, alors que la plupart des autres composants de trnasformation donnent un flux en sortie (que l'on peut stocker sur fichier, en base, ou envoyer dans un autre flux).&lt;/p&gt;
+&lt;p&gt;&lt;a href="http://www.developpez.net/forums/d1314039/logiciels/solutions-d-entreprise/business-intelligence/talend/developpement-jobs/transposer-forme-tabulaire-table-sgbd-vers-forme-matricielle-excel/"&gt;Lien&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href="http://dwetl.com/2015/01/09/split-rows-to-columns/"&gt;Lien2&lt;/a&gt;&lt;/p&gt;</summary><category term="talend"></category><category term="etl"></category></entry><entry><title>Génération des slides</title><link href="http://danc.github.io/generation-des-slides.html" rel="alternate"></link><updated>2015-06-03T00:00:00+02:00</updated><author><name>Daniel</name></author><id>tag:danc.github.io,2015-06-03:generation-des-slides.html</id><summary type="html">&lt;p&gt;Un collègue m'a demandé comment je gérais mes &lt;a href="/slide/bigdata"&gt;présentations&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;Mon trio favori pour cela :&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="http://lab.hakim.se/reveal-js"&gt;reveal.js&lt;/a&gt; : librairie javascript dédiée à l'affichage de slides, table des matières, notes orateur, ...&lt;/li&gt;
+&lt;li&gt;&lt;a href="http://pandoc.org"&gt;pandoc&lt;/a&gt; : outil de conversion multi-formats  (notamment de markdown vers reveal.js)&lt;/li&gt;
+&lt;li&gt;&lt;a href="http://daringfireball.net/projects/markdown/"&gt;Markdown&lt;/a&gt; : convention de formattage légère des documentations, que l'on commence à voir partout, très pratique pour la prise de notes, la rédaction de billets de blog, + options de coloration syntaxique de code, insertion d'images, tableaux, ....&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Le fichier Makefile (qui prend tous les .md d'un répertoire, génère les .html correspondants en reveal.js, et une page d'index :&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="n"&gt;all&lt;/span&gt; &lt;span class="o"&gt;:&lt;/span&gt;
+    &lt;span class="n"&gt;make&lt;/span&gt; &lt;span class="n"&gt;index&lt;/span&gt;
+    &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;i&lt;/span&gt; &lt;span class="k"&gt;in&lt;/span&gt; &lt;span class="o"&gt;*.&lt;/span&gt;&lt;span class="n"&gt;md&lt;/span&gt;&lt;span class="o"&gt;;&lt;/span&gt; &lt;span class="k"&gt;do&lt;/span&gt; &lt;span class="n"&gt;make&lt;/span&gt; &lt;span class="err"&gt;`&lt;/span&gt;&lt;span class="n"&gt;basename&lt;/span&gt; &lt;span class="n"&gt;$$i&lt;/span&gt; &lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;md&lt;/span&gt;&lt;span class="err"&gt;`&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;html&lt;/span&gt;&lt;span class="o"&gt;;&lt;/span&gt; &lt;span class="n"&gt;done&lt;/span&gt;&lt;span class="o"&gt;;&lt;/span&gt;
+
+&lt;span class="o"&gt;%.&lt;/span&gt;&lt;span class="n"&gt;html&lt;/span&gt; &lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="o"&gt;%.&lt;/span&gt;&lt;span class="n"&gt;md&lt;/span&gt;
+    &lt;span class="n"&gt;pandoc&lt;/span&gt;  &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;s&lt;/span&gt;  &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;t&lt;/span&gt; &lt;span class="n"&gt;revealjs&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;V&lt;/span&gt; &lt;span class="n"&gt;theme&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;moon&amp;quot;&lt;/span&gt; &lt;span class="o"&gt;--&lt;/span&gt;&lt;span class="n"&gt;slide&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;level&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;o&lt;/span&gt; &lt;span class="n"&gt;$&lt;/span&gt;&lt;span class="err"&gt;@&lt;/span&gt; &lt;span class="n"&gt;$&lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&lt;/span&gt;
+
+&lt;span class="n"&gt;index&lt;/span&gt; &lt;span class="o"&gt;:&lt;/span&gt;
+    &lt;span class="n"&gt;echo&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;Index&amp;quot;&lt;/span&gt; &lt;span class="o"&gt;&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;index&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;txt&lt;/span&gt;&lt;span class="o"&gt;;&lt;/span&gt;
+    &lt;span class="n"&gt;echo&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;&amp;quot;&lt;/span&gt; &lt;span class="o"&gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;index&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;txt&lt;/span&gt;&lt;span class="o"&gt;;&lt;/span&gt;
+    &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;i&lt;/span&gt; &lt;span class="k"&gt;in&lt;/span&gt; &lt;span class="o"&gt;*.&lt;/span&gt;&lt;span class="n"&gt;md&lt;/span&gt;&lt;span class="o"&gt;;&lt;/span&gt; &lt;span class="k"&gt;do&lt;/span&gt; &lt;span class="n"&gt;echo&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;* [`basename $$i .md`.html](`basename $$i .md`.html)  [(raw sources)]($$i)&amp;quot;&lt;/span&gt;  &lt;span class="o"&gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;index&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;txt&lt;/span&gt;&lt;span class="o"&gt;;&lt;/span&gt; &lt;span class="n"&gt;done&lt;/span&gt;&lt;span class="o"&gt;;&lt;/span&gt;
+    &lt;span class="n"&gt;pandoc&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;f&lt;/span&gt; &lt;span class="n"&gt;markdown&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;t&lt;/span&gt; &lt;span class="n"&gt;html5&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;o&lt;/span&gt; &lt;span class="n"&gt;index&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;html&lt;/span&gt; &lt;span class="n"&gt;index&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;txt&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Voir les &lt;a href="http://pandoc.org/demos.html"&gt;exemples de Pandoc&lt;/a&gt; pour les paramètres utilisés ci-dessus.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Attention !&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;La version de reveal.js utilisée par pandoc n'est pas forcément la dernière de reveal.js, et j'ai eu des problèmes lors des premières générations. Il vaut mieux utiliser la version de librairie reveal.js utilisée par pandoc &lt;/p&gt;
+&lt;p&gt;&lt;a href="/slide/reveal.js.tgz"&gt;Ma copie ici&lt;/a&gt;&lt;/p&gt;</summary><category term="markdown"></category><category term="pandoc"></category><category term="reveal.js"></category></entry><entry><title>Spark Machine Learning</title><link href="http://danc.github.io/spark-machine-learning.html" rel="alternate"></link><updated>2015-05-15T00:00:00+02:00</updated><author><name>Daniel</name></author><id>tag:danc.github.io,2015-05-15:spark-machine-learning.html</id><summary type="html">&lt;p&gt;On continue à jouer avec spark / scala / cassandra&lt;/p&gt;
+&lt;h3&gt;Résumé des épisodes précédents&lt;/h3&gt;
+&lt;p&gt;des tweets ont été récupérés dans une table Cassandra via talend, avec un job simple (voir article précédent)&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;    &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;com.datastax.spark.connector._&lt;/span&gt;
+    &lt;span class="n"&gt;val&lt;/span&gt; &lt;span class="n"&gt;rdd&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;sc&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;cassandraTable&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;dco&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;tweets&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Après avoir généré un joli nuage de mots à partir de ces données, on se demande si on ne peut pas faire du &lt;em&gt;clustering&lt;/em&gt; : regrouper les mots les plus fréquents par thèmes, par groupes de mots revenant plus fréquemment entre eux.&lt;/p&gt;
+&lt;h3&gt;Un algorithme de machine learning : LDA&lt;/h3&gt;
+&lt;p&gt;Le site officiel de spark donne quelques exemples rapides des différents algorithmes disponibles, et &lt;a href="http://spark.apache.org/docs/latest/mllib-clustering.html#latent-dirichlet-allocation-lda"&gt;LDA&lt;/a&gt; a attiré mon attention :&lt;/p&gt;
+&lt;p&gt;pour plus de détails &lt;a href="http://en.wikipedia.org/wiki/Latent_Dirichlet_allocation"&gt;Wikipedia&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;Il permet de regrouper des ensembles de mots par groupes (en nombre paramétrable, &lt;em&gt;k&lt;/em&gt; dans l'algorithme), en fonction de leur proximité/fréquence dans les documents d'origine : un bon moyen de reconstituer les sujets abordé dans un corpus de texte.
+On va essayer de l'appliquer à notre ensemble de tweets !&lt;/p&gt;
+&lt;p&gt;Ce que je comprends de l'exemple fourni par spark, et que l'entrée de l'algorithme est un ensemble d'occurrence de mots (quels qu'ils soient), pour tous les documents dont on dispose.
+Cela donne donc un vecteur de nombres (les occurrences des mots d'un dictionnaire) avec en colonne les mots du dictionnaire, en ligne les documents analysés&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Exemple&lt;/strong&gt; : &lt;/p&gt;
+&lt;p&gt;4 documents analysés, 11 mots en tout dans le dictionnaire&lt;/p&gt;
+&lt;p&gt;Le premier document a 1 occurrence du premier mot, 2 occurrences du 2e mot, 6 occurrences du 3e mot, etc ....&lt;/p&gt;
+&lt;p&gt;La matrice correspondante est :&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;    1 2 6 0 2 3 1 1 0 0 3
+    1 3 0 1 3 0 0 2 0 0 1
+    1 4 1 0 0 4 9 0 1 2 0
+    2 1 0 3 0 0 5 0 2 3 9
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;On voit que l'entrée est juste une matrice de chiffres, notre dictionnaire est stocké à part. &lt;/p&gt;
+&lt;p&gt;Question : on pourrait faire cela avec le dictionnaire Français, sur l'oeuvre complète de Victor Hugo ? (je garde ça pour un autre jour, et ça ne tournera pas sur ma machine seule ...)&lt;/p&gt;
+&lt;h3&gt;Au travail&lt;/h3&gt;
+&lt;p&gt;On revient à nos tweets &lt;/p&gt;
+&lt;p&gt;On avait vu comment récupérer l'ensemble des mots de tous les tweets : (on ne prend que le texte, et pour chacun, on découpe les mots séparés par des espaces)&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;    var words = rdd.select(&amp;quot;text&amp;quot;).as((i: String) =&amp;gt; (i)).flatMap(line =&amp;gt; line.split(&amp;quot; &amp;quot;))
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;On a plein de doublons, de mots qui reviennent plusieurs fois. On avait vu comment compter ces occurrences de doublons (en ne gardant que ceux de plus de 2 caractères) :&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;    var allWords = words.filter(w =&amp;gt; w.length &amp;gt; 3).map(word =&amp;gt; (word, 1)).reduceByKey(_ + _)
+
+    allWords.collect
+    res157: Array[(String, Int)] = Array((image:,1), (News,1), (épisode,7), (goodies,1), (manquer,1), (synergies,1), (@ISTIC_Entrepren,2), (writing,1), (breizhCamp,1), (#Jedi,1), (APIs,1), (TF1,,1), (#lemans,1), (Mans,5), (components,6), (http://t.co/AiIsjpMAcj,4), (chez,1), (been,1), (This,1), (from:,1), (@FlorentTymen:,3), (Pourquoi,1), (applications,1), (#BigData,7), (Hero,1), (used,1), (breath,1), (&amp;#39;From,1), (application,6), (@steffy_29,1), (magazine,1), (#hadoop,1), (Powered,1), (Data,7), (http://t.co/05rgIJ4H79,2), (oppérationnelle,,2), (historique,1), (vocabulaire,1), (8080:8080,1), (@FlorentTymen,2), (vidéo,2), (million,1), (I&amp;#39;ll,1), (pour,10), (#Docker,1), (@sergialmar:,1), (Sarthe,6), (hard,1), (2015,1), (@manekinekko,4), (#badmint…,3), (#BadSii,4), (#badsii,1), (Stolen,1), (site,...
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Et on ne garde que la première partie de chaque doublon (le mot) :&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;    var allMyWords = allWords.map(t =&amp;gt; t._1)
+
+    allMyWords.collect
+    res158: Array[String] = Array(image:, News, épisode, goodies, manquer, synergies, @ISTIC_Entrepren, writing, breizhCamp, #Jedi, APIs, TF1,, #lemans, Mans, components, http://t.co/AiIsjpMAcj, chez, been, This, from:, @FlorentTymen:, Pourquoi, applications, #BigData, Hero, used, breath, &amp;#39;From, application, @steffy_29, magazine, #hadoop, Powered, Data, http://t.co/05rgIJ4H79, oppérationnelle,, historique, vocabulaire, 8080:8080, @FlorentTymen, vidéo, million, I&amp;#39;ll, pour, #Docker, @sergialmar:, Sarthe, hard, 2015, @manekinekko, #badmint…, #BadSii, #badsii, Stolen, site, @RennesAtalante:, http://t.co/Vt3Hx7Azzw, @anssiwilkko:, #SII, @SII_Ouest, @sii_rhonealpes, partenaire, SpringOne, http://t.co/iXf2DQkRnB, #LeMans, Ops., prototypes, better, @vogloblinsky, nouvelle, Créer, it&amp;#39;s, différemment...
+
+    allMyWords.count
+    res162: Long = 328
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;On aurait pu aller beaucoup plus vite en dédoublonnant directement :&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;    words.filter(w =&amp;gt; w.length &amp;gt; 3).distinct.count
+    res163: Long = 328
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Voilà, on a notre liste de mots distinct, qui nous servira de dictionnaire. Reste maintenant à générer des lignes, pour chaque tweet, comportant l'occurrence de ces mots dans chaque colonne.&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;Rappel&lt;/em&gt; : je débute, je tatonne, il y a probablement moyen de faire plus efficace et plus propre !&lt;/p&gt;
+&lt;h3&gt;Un premier tweet&lt;/h3&gt;
+&lt;p&gt;On joue un peu avec un premier tweet :&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;var firstTweet = rdd.first
+firstTweet.toMap(&amp;quot;text&amp;quot;).toString
+res169: String = RT @mda_sii_ouest: [Updated] Introduction aux web components, des composants HTML5/JavaScript réutilisables http://t.co/iXf2DQkRnB @mda_sii…
+
+firstTweet.toMap(&amp;quot;text&amp;quot;).toString.split(&amp;quot; &amp;quot;)
+
+var ftc = sc.parallelize(firstTweet.toMap(&amp;quot;text&amp;quot;).toString.split(&amp;quot; &amp;quot;)).map(word =&amp;gt; (word, 1)).reduceByKey(_ + _)
+var ftca = ftc.toArray
+res167: Array[(String, Int)] = Array((@mda_sii…,1), (aux,1), (web,1), ([Updated],1), (RT,1), (des,1), (réutilisables,1), (HTML5/JavaScript,1), (components,,1), (http://t.co/iXf2DQkRnB,1), (Introduction,1), (composants,1), (@mda_sii_ouest:,1))
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Pas mal ! On va en faire une fonction qui prend un tweet en entrée, et renvoie les tuples (mot, occurrences) :&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;    &lt;span class="nt"&gt;def&lt;/span&gt; &lt;span class="nt"&gt;twitRow&lt;/span&gt; &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="nt"&gt;t&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="nt"&gt;com&lt;/span&gt;&lt;span class="nc"&gt;.datastax.spark.connector.CassandraRow&lt;/span&gt;&lt;span class="o"&gt;):&lt;/span&gt; &lt;span class="nt"&gt;Array&lt;/span&gt;&lt;span class="cp"&gt;[&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;String&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;Int&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="cp"&gt;]&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt; &lt;span class="n"&gt;var&lt;/span&gt; &lt;span class="n"&gt;ft&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;sc&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;parallelize&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;t&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;toMap&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;text&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;toString&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;split&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot; &amp;quot;&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;map&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;word&lt;/span&gt; &lt;span class="o"&gt;=&amp;gt;&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;word&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;reduceByKey&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="n"&gt;_&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;_&lt;/span&gt; &lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;toArray&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt; &lt;span class="n"&gt;ft&lt;/span&gt;  &lt;span class="p"&gt;}&lt;/span&gt;
+
+    &lt;span class="nt"&gt;twitRow&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="nt"&gt;firstTweet&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;
+    &lt;span class="nt"&gt;res170&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="nt"&gt;Array&lt;/span&gt;&lt;span class="cp"&gt;[&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;String&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;Int&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="cp"&gt;]&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nt"&gt;Array&lt;/span&gt;&lt;span class="o"&gt;((&lt;/span&gt;&lt;span class="k"&gt;@mda_sii&lt;/span&gt;&lt;span class="err"&gt;…&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;&lt;span class="nt"&gt;1&lt;/span&gt;&lt;span class="o"&gt;),&lt;/span&gt; &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="nt"&gt;aux&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;&lt;span class="nt"&gt;1&lt;/span&gt;&lt;span class="o"&gt;),&lt;/span&gt; &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="nt"&gt;web&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;&lt;span class="nt"&gt;1&lt;/span&gt;&lt;span class="o"&gt;),&lt;/span&gt; &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="cp"&gt;[&lt;/span&gt;&lt;span class="nx"&gt;Updated&lt;/span&gt;&lt;span class="cp"&gt;]&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;&lt;span class="nt"&gt;1&lt;/span&gt;&lt;span class="o"&gt;),&lt;/span&gt; &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="nt"&gt;RT&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;&lt;span class="nt"&gt;1&lt;/span&gt;&lt;span class="o"&gt;),&lt;/span&gt; &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="nt"&gt;des&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;&lt;span class="nt"&gt;1&lt;/span&gt;&lt;span class="o"&gt;),&lt;/span&gt; &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="nt"&gt;r&lt;/span&gt;&lt;span class="err"&gt;é&lt;/span&gt;&lt;span class="nt"&gt;utilisables&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;&lt;span class="nt"&gt;1&lt;/span&gt;&lt;span class="o"&gt;),&lt;/span&gt; &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="nt"&gt;HTML5&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="nt"&gt;JavaScript&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;&lt;span class="nt"&gt;1&lt;/span&gt;&lt;span class="o"&gt;),&lt;/span&gt; &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="nt"&gt;components&lt;/span&gt;&lt;span class="o"&gt;,,&lt;/span&gt;&lt;span class="nt"&gt;1&lt;/span&gt;&lt;span class="o"&gt;),&lt;/span&gt; &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="nt"&gt;http&lt;/span&gt;&lt;span class="o"&gt;://&lt;/span&gt;&lt;span class="nt"&gt;t&lt;/span&gt;&lt;span class="nc"&gt;.co&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="nt"&gt;iXf2DQkRnB&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;&lt;span class="nt"&gt;1&lt;/span&gt;&lt;span class="o"&gt;),&lt;/span&gt; &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="nt"&gt;Introduction&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;&lt;span class="nt"&gt;1&lt;/span&gt;&lt;span class="o"&gt;),&lt;/span&gt; &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="nt"&gt;composants&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;&lt;span class="nt"&gt;1&lt;/span&gt;&lt;span class="o"&gt;),&lt;/span&gt; &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="k"&gt;@mda_sii_ouest&lt;/span&gt;&lt;span class="o"&gt;:,&lt;/span&gt;&lt;span class="nt"&gt;1&lt;/span&gt;&lt;span class="o"&gt;))&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;On va maintenant génére la ligne correspondant aux mots du dictionnaire, avec les occurrences des mots du premier tweet :&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;scala&lt;span class="o"&gt;&amp;gt;&lt;/span&gt;  allMyWords.map&lt;span class="p"&gt;(&lt;/span&gt;w &lt;span class="o"&gt;=&amp;gt;&lt;/span&gt; &lt;span class="p"&gt;((&lt;/span&gt;s&lt;span class="o"&gt;:&lt;/span&gt; String&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;=&amp;gt;&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt; var res&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;  &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kr"&gt;for&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;j &lt;span class="o"&gt;&amp;lt;-&lt;/span&gt; Range &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; ftca.size &lt;span class="p"&gt;)&lt;/span&gt;  &lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="kr"&gt;if&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;s &lt;span class="o"&gt;==&lt;/span&gt; ftca&lt;span class="p"&gt;(&lt;/span&gt;j&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="m"&gt;.&lt;/span&gt;_&lt;span class="m"&gt;1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;res&lt;span class="o"&gt;=&lt;/span&gt;ftca&lt;span class="p"&gt;(&lt;/span&gt;j&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="m"&gt;.&lt;/span&gt;_&lt;span class="m"&gt;2&lt;/span&gt;&lt;span class="p"&gt;}});&lt;/span&gt; res  &lt;span class="p"&gt;}&lt;/span&gt;   &lt;span class="p"&gt;)&lt;/span&gt;   &lt;span class="p"&gt;(&lt;/span&gt;w&lt;span class="p"&gt;))&lt;/span&gt;
+res171&lt;span class="o"&gt;:&lt;/span&gt; org.apache.spark.rdd.RDD&lt;span class="p"&gt;[&lt;/span&gt;Int&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; MapPartitionsRDD&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="m"&gt;5834&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; at map at &lt;span class="o"&gt;&amp;lt;&lt;/span&gt;console&lt;span class="o"&gt;&amp;gt;:&lt;/span&gt;&lt;span class="m"&gt;44&lt;/span&gt;
+
+scala&lt;span class="o"&gt;&amp;gt;&lt;/span&gt; res171.collect
+res172&lt;span class="o"&gt;:&lt;/span&gt; Array&lt;span class="p"&gt;[&lt;/span&gt;Int&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; Array&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="kc"&gt;...&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Effectivement, dans les tweets, on ne répète que rarement le même mot. On aura au final une matrice assez creuse, avec uniquement des 0 et des 1 (mais plusieurs 1 sur la même colonne : même mot dans plusieurs tweets, comme on l'a vu dans le nuage de mots de l'article précédent)&lt;/p&gt;
+&lt;p&gt;A cette occasion, on va compléter notre fonction pour générer la ligne de la matrice pour un tweet :&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;    def twitRow2 &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kp"&gt;t&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; com.datastax.spark.connector.CassandraRow&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; org.apache.spark.rdd.RDD&lt;span class="p"&gt;[&lt;/span&gt;Int&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt; 
+        var ft &lt;span class="o"&gt;=&lt;/span&gt; sc.parallelize&lt;span class="p"&gt;(&lt;/span&gt;t.toMap&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;text&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="m"&gt;.&lt;/span&gt;toString.split&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;quot; &amp;quot;&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;&lt;span class="m"&gt;.&lt;/span&gt;map&lt;span class="p"&gt;(&lt;/span&gt;word &lt;span class="o"&gt;=&amp;gt;&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;word&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;&lt;span class="m"&gt;.&lt;/span&gt;reduceByKey&lt;span class="p"&gt;(&lt;/span&gt; _ &lt;span class="o"&gt;+&lt;/span&gt; _ &lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="m"&gt;.&lt;/span&gt;toArray&lt;span class="p"&gt;;&lt;/span&gt; 
+         allMyWords.map&lt;span class="p"&gt;(&lt;/span&gt;w &lt;span class="o"&gt;=&amp;gt;&lt;/span&gt; &lt;span class="p"&gt;((&lt;/span&gt;s&lt;span class="o"&gt;:&lt;/span&gt; String&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;=&amp;gt;&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt; var res&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;  &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kr"&gt;for&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;j &lt;span class="o"&gt;&amp;lt;-&lt;/span&gt; Range &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; ft.size &lt;span class="p"&gt;)&lt;/span&gt;  &lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="kr"&gt;if&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;s &lt;span class="o"&gt;==&lt;/span&gt; ft&lt;span class="p"&gt;(&lt;/span&gt;j&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="m"&gt;.&lt;/span&gt;_&lt;span class="m"&gt;1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;res&lt;span class="o"&gt;=&lt;/span&gt;ft&lt;span class="p"&gt;(&lt;/span&gt;j&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="m"&gt;.&lt;/span&gt;_&lt;span class="m"&gt;2&lt;/span&gt;&lt;span class="p"&gt;}});&lt;/span&gt; res  &lt;span class="p"&gt;}&lt;/span&gt;   &lt;span class="p"&gt;)&lt;/span&gt;   &lt;span class="p"&gt;(&lt;/span&gt;w&lt;span class="p"&gt;))&lt;/span&gt;
+    &lt;span class="p"&gt;}&lt;/span&gt;
+
+    scala&lt;span class="o"&gt;&amp;gt;&lt;/span&gt; twitRow2&lt;span class="p"&gt;(&lt;/span&gt;firstTweet&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="m"&gt;.&lt;/span&gt;collect
+    res174&lt;span class="o"&gt;:&lt;/span&gt; Array&lt;span class="p"&gt;[&lt;/span&gt;Int&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; Array&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="kc"&gt;...&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Bon il y a sûrement moyen de générer directement le Vecteur d'entrée pour l'agorithme LDA, mais je manque un peu de temps (revenez plus tard ...)&lt;/p&gt;
+&lt;h3&gt;tous les tweets&lt;/h3&gt;
+&lt;p&gt;c'est pas beau mais je suis pressé :&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="kr"&gt;for&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;i &lt;span class="o"&gt;&amp;lt;-&lt;/span&gt; Range &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; rdd.count.toInt&lt;span class="p"&gt;))&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt; twitRow2&lt;span class="p"&gt;(&lt;/span&gt;rdd.take&lt;span class="p"&gt;(&lt;/span&gt;i&lt;span class="m"&gt;+1&lt;/span&gt;&lt;span class="p"&gt;)(&lt;/span&gt;i&lt;span class="p"&gt;))&lt;/span&gt;&lt;span class="m"&gt;.&lt;/span&gt;foreach&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;c&lt;/span&gt; &lt;span class="o"&gt;=&amp;gt;&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt; &lt;span class="kp"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;c&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;;&lt;/span&gt; &lt;span class="kp"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;quot; &amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)});&lt;/span&gt; println &lt;span class="p"&gt;}&lt;/span&gt;
+
+var allMy &lt;span class="o"&gt;=&lt;/span&gt; allMyWords.toArray
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h1&gt;LDA&lt;/h1&gt;
+&lt;p&gt;On peut maintenant appliquer l'algorithme LDA à notre matrice, préalablement stockée dans un fichier rows.txt&lt;/p&gt;
+&lt;p&gt;(pompé directement de l'exemple de spark)&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;    &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;org.apache.spark.mllib.clustering.LDA&lt;/span&gt;
+    &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;org.apache.spark.mllib.linalg.Vectors&lt;/span&gt;
+
+    &lt;span class="o"&gt;//&lt;/span&gt; &lt;span class="n"&gt;Load&lt;/span&gt; &lt;span class="ow"&gt;and&lt;/span&gt; &lt;span class="n"&gt;parse&lt;/span&gt; &lt;span class="n"&gt;the&lt;/span&gt; &lt;span class="n"&gt;data&lt;/span&gt;
+    &lt;span class="n"&gt;val&lt;/span&gt; &lt;span class="n"&gt;data&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;sc&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;textFile&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;rows.txt&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="n"&gt;val&lt;/span&gt; &lt;span class="n"&gt;parsedData&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;data&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;map&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;s&lt;/span&gt; &lt;span class="o"&gt;=&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;Vectors&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;dense&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;s&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;trim&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;split&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;#39; &amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;map&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;_&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;toDouble&lt;/span&gt;&lt;span class="p"&gt;)))&lt;/span&gt;
+    &lt;span class="o"&gt;//&lt;/span&gt; &lt;span class="n"&gt;Index&lt;/span&gt; &lt;span class="n"&gt;documents&lt;/span&gt; &lt;span class="k"&gt;with&lt;/span&gt; &lt;span class="n"&gt;unique&lt;/span&gt; &lt;span class="n"&gt;IDs&lt;/span&gt;
+    &lt;span class="n"&gt;val&lt;/span&gt; &lt;span class="n"&gt;corpus&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;parsedData&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;zipWithIndex&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;map&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;_&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;swap&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;cache&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+
+    &lt;span class="o"&gt;//&lt;/span&gt; &lt;span class="n"&gt;Cluster&lt;/span&gt; &lt;span class="n"&gt;the&lt;/span&gt; &lt;span class="n"&gt;documents&lt;/span&gt; &lt;span class="n"&gt;into&lt;/span&gt; &lt;span class="n"&gt;three&lt;/span&gt; &lt;span class="n"&gt;topics&lt;/span&gt; &lt;span class="n"&gt;using&lt;/span&gt; &lt;span class="n"&gt;LDA&lt;/span&gt;
+    &lt;span class="o"&gt;//&lt;/span&gt; &lt;span class="n"&gt;On&lt;/span&gt; &lt;span class="n"&gt;d&lt;/span&gt;&lt;span class="err"&gt;é&lt;/span&gt;&lt;span class="n"&gt;finit&lt;/span&gt; &lt;span class="n"&gt;arbitrairement&lt;/span&gt; &lt;span class="mi"&gt;3&lt;/span&gt; &lt;span class="n"&gt;groupes&lt;/span&gt; &lt;span class="err"&gt;!!!&lt;/span&gt;
+    &lt;span class="n"&gt;val&lt;/span&gt; &lt;span class="n"&gt;ldaModel&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;new&lt;/span&gt; &lt;span class="n"&gt;LDA&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;setK&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;3&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;run&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;corpus&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="o"&gt;//&lt;/span&gt; &lt;span class="n"&gt;Output&lt;/span&gt; &lt;span class="n"&gt;topics&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt; &lt;span class="n"&gt;Each&lt;/span&gt; &lt;span class="ow"&gt;is&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="n"&gt;distribution&lt;/span&gt; &lt;span class="n"&gt;over&lt;/span&gt; &lt;span class="n"&gt;words&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;matching&lt;/span&gt; &lt;span class="n"&gt;word&lt;/span&gt; &lt;span class="n"&gt;count&lt;/span&gt; &lt;span class="n"&gt;vectors&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="n"&gt;println&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;Learned topics (as distributions over vocab of &amp;quot;&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;ldaModel&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;vocabSize&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="s"&gt;&amp;quot; words):&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="n"&gt;val&lt;/span&gt; &lt;span class="n"&gt;topics&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;ldaModel&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;topicsMatrix&lt;/span&gt;
+    &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;topic&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="n"&gt;Range&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;3&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+      &lt;span class="k"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;Topic &amp;quot;&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;topic&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;:&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+      &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;word&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="n"&gt;Range&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;ldaModel&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;vocabSize&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt; &lt;span class="k"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;quot; &amp;quot;&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;topics&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;word&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;topic&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="s"&gt;&amp;quot; &amp;quot;&lt;/span&gt;&lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;allMy&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;word&lt;/span&gt;&lt;span class="p"&gt;));&lt;/span&gt; &lt;span class="p"&gt;}&lt;/span&gt;
+      &lt;span class="n"&gt;println&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+    &lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;On peut donc obtenir nos 3 groupes, avec, pour chaque mot du dictionnaire, leur coefficient dans le groupe.&lt;/p&gt;
+&lt;p&gt;Afin de mieux visualiser, on va stocker ces trois groupes (topics) dans trois collections triées :&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;val topic0 &lt;span class="o"&gt;=&lt;/span&gt;  scala.collection.mutable.Map&lt;span class="p"&gt;[&lt;/span&gt;Double&lt;span class="p"&gt;,&lt;/span&gt;String&lt;span class="p"&gt;]()&lt;/span&gt;
+&lt;span class="kr"&gt;for&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;word &lt;span class="o"&gt;&amp;lt;-&lt;/span&gt; Range&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; ldaModel.vocabSize&lt;span class="p"&gt;))&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;  topic0 &lt;span class="o"&gt;+=&lt;/span&gt; topics&lt;span class="p"&gt;(&lt;/span&gt;word&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;-&amp;gt;&lt;/span&gt;  allMy&lt;span class="p"&gt;(&lt;/span&gt;word&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;idem pour topic1 et topic2&lt;/p&gt;
+&lt;p&gt;Un peu de tri, et on visualise les plus gros scores :&lt;/p&gt;
+&lt;h3&gt;topic0 : les mots des Sarthois&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;topic0.toList.sorted foreach { case (key, value) =&amp;gt; println(key + &amp;quot; = &amp;quot; + value)}
+
+4.249550480296365 = @mavillelemans
+4.541434020266467 = développement
+4.61044366402017 = Sarthe
+4.647085683489432 = local
+5.183945645795795 = parler
+5.32725232101005 = continue
+5.4152334597901834 = #LeMans
+5.568853863334123 = @mda_sii_ouest
+6.983978587587469 = @GroupeSII
+9.554092492106358 = @sii_ouest
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h3&gt;topic1 : le stream technique&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;topic1.toList.sorted foreach { case (key, value) =&amp;gt; println(key + &amp;quot; = &amp;quot; + value)}
+
+
+2.231639628895238 = épisode
+2.2994995186433447 = Data
+2.3420972909813846 = lance
+2.5774724965644165 = [Updated]
+2.6483653997464023 = @GroupeSII
+2.72489202051636 = with
+2.742077593792608 = Polymer
+2.7478357714082873 = pour
+3.029747974954719 = components
+3.0391798897002174 = Créer
+3.293847887133726 = HTML5
+3.5723032989964327 = application
+3.7444349806995456 = avec
+4.020639688007065 = @GroupeSII:
+7.100699838644399 = @mda_sii_ouest
+9.49418210622817 = @sii_ouest
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h3&gt;topic2 : les RH recrutent&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;topic2.toList.sorted foreach { case (key, value) =&amp;gt; println(key + &amp;quot; = &amp;quot; + value)}
+
+
+3.2071341812997423 = Data
+3.428164742875275 = #Emploi
+3.5862289643239595 = pour
+3.69716968199824 = @GroupeSII:
+3.777836068589731 = #BigData
+3.9479273872750174 = recrute
+4.946934547153257 = [Updated]
+6.951725401665473 = @sii_ouest
+8.330446298021478 = @mda_sii_ouest
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h2&gt;Petite conclusion temporaire&lt;/h2&gt;
+&lt;p&gt;Il faudrait probablement supprimer certains mots du dictionnaire qui reviennent trop souvent dans les trois groupes (normal, c'est comme cela que l'on récupère les tweets chez Twitter):
+@sii_ouest
+@mda_sii_ouest&lt;/p&gt;
+&lt;p&gt;Il pourrait être intéressant de jouer avec les paramètres de l'algorithme (nombre de groupes, et autres paramètres globaux), avec plus de volumétrie, plus de tweets, sur d'autres sources, 
+mais cet article est déjà beaucoup trop long, et pour une première c'est pas si mal ....&lt;/p&gt;
+&lt;p&gt;Si le sujet vous intéresse, un autre article de &lt;a href="http://blog.xebia.fr/2015/05/11/les-outils-de-la-data-science-spark-mllib-theorie-et-concepts-12/"&gt;xebia.fr&lt;/a&gt;, qui va beaucoup moins vite, et pose des bases plus saines (mais ils ont plus de temps que moi à consacrer au sujet ?)&lt;/p&gt;</summary><category term="scala"></category><category term="spark"></category><category term="cassandra"></category><category term="bigdata"></category><category term="machinelearning"></category><category term="lda"></category></entry><entry><title>Spark Cassandra Premier essai</title><link href="http://danc.github.io/spark-cassandra-premier-essai.html" rel="alternate"></link><updated>2015-05-14T00:00:00+02:00</updated><author><name>Daniel</name></author><id>tag:danc.github.io,2015-05-14:spark-cassandra-premier-essai.html</id><summary type="html">&lt;p&gt;Après avoir mis en place notre &lt;a href="http://danc.alwaysdata.net/pro/spark-cassandra-connector.html"&gt;environnement de travail&lt;/a&gt;  , on continue à jouer avec spark / scala / cassandra&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Attention&lt;/strong&gt;, il s'agit d'exploration rapide et dans les grandes lignes : Je cherche juste à valider quelques points et exécuter un cas d'usage , sans forcément utiliser la méthode la plus complète, le code le plus propre, efficace, etc...
+Il y a surement des choses à améliorer : l'idée est simplement de mettre les choses en place !&lt;/p&gt;
+&lt;h1&gt;Les données&lt;/h1&gt;
+&lt;p&gt;Des tweets ont été stockés dans une table Cassandra via un job Talend &lt;/p&gt;
+&lt;p&gt;Ils suivent l'activité sur Twitter de _sii_ouest (on ne gère pas ici le temps réel, ni l'exhaustivité, on récupère juste un paquet de tweets à un instant donné)&lt;/p&gt;
+&lt;h2&gt;Job Talend&lt;/h2&gt;
+&lt;p&gt;Inspiré des démos BigData de Talend : &lt;/p&gt;
+&lt;p&gt;On récupère via l'API REST de twitter un certain nombre de tweets sur un sujet donné, on filtre les colonnes qui nous intéressent (l'API est riche !) et on stocke sur notre base Cassandra.&lt;/p&gt;
+&lt;p&gt;&lt;img alt="copie décran du job" src="/slide/bigdata/talend_sii_ouest.png" /&gt;&lt;/p&gt;
+&lt;h2&gt;Récupération des tweets depuis Cassandra dans spark :&lt;/h2&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;    &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;com.datastax.spark.connector._&lt;/span&gt;
+    &lt;span class="n"&gt;val&lt;/span&gt; &lt;span class="n"&gt;rdd&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;sc&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;cassandraTable&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;dco&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;tweets&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h3&gt;On peut récupèrer juste les colonnes qui nous intéressent :&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;    val rdd2 = rdd.select(&amp;quot;id&amp;quot;, &amp;quot;text&amp;quot;).as((i: String, w: String) =&amp;gt; (i, w))
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h3&gt;Et les restocker dans une autre table :&lt;/h3&gt;
+&lt;p&gt;dans cqlsh, création d'une nouvelle table&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;    create table t3 (id text PRIMARY KEY, text text);
+
+    rdd2.saveToCassandra(&amp;quot;dco&amp;quot;, &amp;quot;t3&amp;quot;, SomeColumns(&amp;quot;id&amp;quot;, &amp;quot;text&amp;quot;))
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h1&gt;un début de traitement simple en spark&lt;/h1&gt;
+&lt;p&gt;Pour se faire la main, et apprendre un peu à manipuler les données&lt;/p&gt;
+&lt;p&gt;(&lt;em&gt;TODO&lt;/em&gt; suivre un cours scala et spark pour optimiser un peu tout ça ...)&lt;/p&gt;
+&lt;h3&gt;On récupère l'ensemble des mots de tous les tweets :&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;    var words = rdd.select(&amp;quot;text&amp;quot;).as((i: String) =&amp;gt; (i)).flatMap(line =&amp;gt; line.split(&amp;quot; &amp;quot;))
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h3&gt;et on compte leurs occurrences&lt;/h3&gt;
+&lt;p&gt;on les groupe en doublets (mot, compteur) avec compteur initial = 1, puis on les regroupe (reduceByKey) et additionne les compteurs&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;    words.map(word =&amp;gt; (word, 1)).reduceByKey(_ + _).collect()
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;On note au passage que cela ressemble furieusement à du Map/reduce classique,  et que cela est scalable et exécutable sur un cluster de machines dès qu'on a vraiment de la grosse volumétrie&lt;/p&gt;
+&lt;p&gt;on peut tout sauver sur fichier :&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;    words.map(word =&amp;gt; (word, 1)).reduceByKey(_ + _).saveAsTextFile(&amp;quot;file:///home/daniel/cloud.txt&amp;quot;)
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Au passage, on élimine les mots de moins de 3 caractères (articles le la , RT , ...)&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;    words.filter(w =&amp;gt; w.length &amp;gt; 3)
+    words.filter(w =&amp;gt; w.length &amp;gt; 3).saveAsTextFile(&amp;quot;file:///home/daniel/words.txt&amp;quot;)
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;On peut alors générer un nuage de mots à partir de ce fichier. (voir le site &lt;a href="http://www.wordle.net"&gt;wordle&lt;/a&gt;) ou l'excellent &lt;a href="https://www.jasondavies.com/wordcloud"&gt;https://www.jasondavies.com/wordcloud&lt;/a&gt; qui utilise la librairie d3.js&lt;/p&gt;
+&lt;p&gt;Et voilà le résultat :&lt;/p&gt;
+&lt;p&gt;&lt;svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="600" width="960"&gt;&lt;g&gt;&lt;/g&gt;&lt;g transform="translate(480,300)"&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(57, 59, 121);" transform="translate(-11,106)rotate(-30.00000044529205)scale(0.9999999865388264,0.9999999865388264)" text-anchor="middle"&gt;&lt;/text&gt;&lt;text style="font-size: 91px; font-family: Impact; fill: rgb(140, 162, 82);" transform="translate(-185,169)" text-anchor="middle"&gt;JavaScript&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(206, 219, 156);" transform="translate(-167,172)rotate(-59.99999955470795)scale(0.9999999865388264,0.9999999865388264)" text-anchor="middle"&gt;cloud&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(181, 207, 107);" transform="translate(-153,-116)rotate(-30.00000044529205)scale(0.9999999865388264,0.9999999865388264)" text-anchor="middle"&gt;time&lt;/text&gt;&lt;text style="font-size: 86px; font-family: Impact; fill: rgb(231, 150, 156);" transform="translate(7,-113)rotate(-30.00000044529205)scale(0.9999999865388264,0.9999999865388264)" text-anchor="middle"&gt;Data&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(107, 110, 207);" transform="translate(211,-44)rotate(59.99999955470795)scale(0.9999999865388264,0.9999999865388264)" text-anchor="middle"&gt;quite&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(107, 110, 207);" transform="translate(89,25)rotate(59.999999554707955)scale(0.9999999865388264,0.9999999865388264)" text-anchor="middle"&gt;Web&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(189, 158, 57);" transform="translate(112,100)rotate(-30.00000044529205)scale(0.9999999865388264,0.9999999865388264)" text-anchor="middle"&gt;hard&lt;/text&gt;&lt;text style="font-size: 100px; font-family: Impact; fill: rgb(189, 158, 57);" transform="translate(16,80)rotate(30)" text-anchor="middle"&gt;Updated&lt;/text&gt;&lt;text style="font-size: 100px; font-family: Impact; fill: rgb(231, 186, 82);" transform="translate(149,-92)rotate(-30)" text-anchor="middle"&gt;LeMans&lt;/text&gt;&lt;text style="font-size: 100px; font-family: Impact; fill: rgb(231, 203, 148);" transform="translate(-190,16)rotate(-60)" text-anchor="middle"&gt;pour&lt;/text&gt;&lt;text style="font-size: 86px; font-family: Impact; fill: rgb(132, 60, 57);" transform="translate(-196,-105)rotate(-30)" text-anchor="middle"&gt;continue&lt;/text&gt;&lt;text style="font-size: 86px; font-family: Impact; fill: rgb(173, 73, 74);" transform="translate(213,62)rotate(60)" text-anchor="middle"&gt;recrute&lt;/text&gt;&lt;text style="font-size: 86px; font-family: Impact; fill: rgb(214, 97, 107);" transform="translate(59,-233)rotate(0)" text-anchor="middle"&gt;BigData&lt;/text&gt;&lt;text style="font-size: 86px; font-family: Impact; fill: rgb(231, 150, 156);" transform="translate(-252,-160)rotate(-30)" text-anchor="middle"&gt;HTML5&lt;/text&gt;&lt;text style="font-size: 86px; font-family: Impact; fill: rgb(123, 65, 115);" transform="translate(245,-32)rotate(60)" text-anchor="middle"&gt;avec&lt;/text&gt;&lt;text style="font-size: 72px; font-family: Impact; fill: rgb(165, 81, 148);" transform="translate(-313,16)rotate(-30)" text-anchor="middle"&gt;Mans&lt;/text&gt;&lt;text style="font-size: 64px; font-family: Impact; fill: rgb(206, 109, 189);" transform="translate(-90,225)rotate(0)" text-anchor="middle"&gt;composants&lt;/text&gt;&lt;text style="font-size: 64px; font-family: Impact; fill: rgb(222, 158, 214);" transform="translate(107,23)rotate(60)" text-anchor="middle"&gt;BDD&lt;/text&gt;&lt;text style="font-size: 64px; font-family: Impact; fill: rgb(57, 59, 121);" transform="translate(217,235)rotate(0)" text-anchor="middle"&gt;docker&lt;/text&gt;&lt;text style="font-size: 64px; font-family: Impact; fill: rgb(82, 84, 163);" transform="translate(350,-89)rotate(-30)" text-anchor="middle"&gt;Afin&lt;/text&gt;&lt;text style="font-size: 64px; font-family: Impact; fill: rgb(107, 110, 207);" transform="translate(364,41)rotate(-60)" text-anchor="middle"&gt;com&lt;/text&gt;&lt;text style="font-size: 64px; font-family: Impact; fill: rgb(156, 158, 222);" transform="translate(-343,-212)rotate(0)" text-anchor="middle"&gt;lasso&lt;/text&gt;&lt;text style="font-size: 64px; font-family: Impact; fill: rgb(99, 121, 57);" transform="translate(355,-155)rotate(-30)" text-anchor="middle"&gt;site&lt;/text&gt;&lt;text style="font-size: 64px; font-family: Impact; fill: rgb(140, 162, 82);" transform="translate(-321,65)rotate(-30)" text-anchor="middle"&gt;sous&lt;/text&gt;&lt;text style="font-size: 52px; font-family: Impact; fill: rgb(181, 207, 107);" transform="translate(-131,67)rotate(-30)" text-anchor="middle"&gt;SII&lt;/text&gt;&lt;text style="font-size: 52px; font-family: Impact; fill: rgb(206, 219, 156);" transform="translate(376,141)rotate(60)" text-anchor="middle"&gt;office&lt;/text&gt;&lt;text style="font-size: 37px; font-family: Impact; fill: rgb(140, 109, 49);" transform="translate(-85,73)rotate(-30)" text-anchor="middle"&gt;vous&lt;/text&gt;&lt;text style="font-size: 37px; font-family: Impact; fill: rgb(189, 158, 57);" transform="translate(63,27)rotate(60)" text-anchor="middle"&gt;avez&lt;/text&gt;&lt;text style="font-size: 37px; font-family: Impact; fill: rgb(231, 186, 82);" transform="translate(-57,93)rotate(-30)" text-anchor="middle"&gt;raté&lt;/text&gt;&lt;text style="font-size: 37px; font-family: Impact; fill: rgb(231, 203, 148);" transform="translate(119,-179)rotate(30)" text-anchor="middle"&gt;linfo&lt;/text&gt;&lt;text style="font-size: 37px; font-family: Impact; fill: rgb(132, 60, 57);" transform="translate(365,-229)rotate(-30)" text-anchor="middle"&gt;publié&lt;/text&gt;&lt;text style="font-size: 37px; font-family: Impact; fill: rgb(173, 73, 74);" transform="translate(349,172)rotate(60)" text-anchor="middle"&gt;nouvelle&lt;/text&gt;&lt;text style="font-size: 37px; font-family: Impact; fill: rgb(214, 97, 107);" transform="translate(359,-38)rotate(-60)" text-anchor="middle"&gt;vidéo&lt;/text&gt;&lt;text style="font-size: 37px; font-family: Impact; fill: rgb(231, 150, 156);" transform="translate(398,88)rotate(60)" text-anchor="middle"&gt;share&lt;/text&gt;&lt;text style="font-size: 37px; font-family: Impact; fill: rgb(123, 65, 115);" transform="translate(-332,226)rotate(30)" text-anchor="middle"&gt;Hado&lt;/text&gt;&lt;text style="font-size: 37px; font-family: Impact; fill: rgb(165, 81, 148);" transform="translate(342,-254)rotate(-30)" text-anchor="middle"&gt;Week&lt;/text&gt;&lt;text style="font-size: 37px; font-family: Impact; fill: rgb(206, 109, 189);" transform="translate(175,-206)rotate(0)" text-anchor="middle"&gt;tous&lt;/text&gt;&lt;text style="font-size: 37px; font-family: Impact; fill: rgb(222, 158, 214);" transform="translate(114,170)rotate(30)" text-anchor="middle"&gt;Cest&lt;/text&gt;&lt;text style="font-size: 37px; font-family: Impact; fill: rgb(57, 59, 121);" transform="translate(12,-69)rotate(-60)" text-anchor="middle"&gt;soir&lt;/text&gt;&lt;text style="font-size: 37px; font-family: Impact; fill: rgb(82, 84, 163);" transform="translate(-405,-38)rotate(60)" text-anchor="middle"&gt;juin&lt;/text&gt;&lt;text style="font-size: 37px; font-family: Impact; fill: rgb(107, 110, 207);" transform="translate(-376,238)rotate(30)" text-anchor="middle"&gt;prêt&lt;/text&gt;&lt;text style="font-size: 37px; font-family: Impact; fill: rgb(156, 158, 222);" transform="translate(-62,-151)rotate(-30)" text-anchor="middle"&gt;tester&lt;/text&gt;&lt;text style="font-size: 37px; font-family: Impact; fill: rgb(99, 121, 57);" transform="translate(-184,56)rotate(-60)" text-anchor="middle"&gt;dans&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(140, 162, 82);" transform="translate(-35,119)rotate(0)" text-anchor="middle"&gt;370&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(181, 207, 107);" transform="translate(111,44)rotate(0)" text-anchor="middle"&gt;Boot&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(206, 219, 156);" transform="translate(-162,8)rotate(60)" text-anchor="middle"&gt;Yaml&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(140, 109, 49);" transform="translate(12,97)rotate(60)" text-anchor="middle"&gt;Editor&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(189, 158, 57);" transform="translate(-114,-94)rotate(60)" text-anchor="middle"&gt;mdasiiouest&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(231, 186, 82);" transform="translate(62,121)rotate(30)" text-anchor="middle"&gt;Stolen&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(231, 203, 148);" transform="translate(-151,116)rotate(-60)" text-anchor="middle"&gt;Harvest&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(132, 60, 57);" transform="translate(-307,89)rotate(60)" text-anchor="middle"&gt;Hijacking&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(173, 73, 74);" transform="translate(131,-53)rotate(30)" text-anchor="middle"&gt;Global&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(214, 97, 107);" transform="translate(137,90)rotate(0)" text-anchor="middle"&gt;Food&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(231, 150, 156);" transform="translate(51,-127)rotate(-30)" text-anchor="middle"&gt;Supply&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(123, 65, 115);" transform="translate(101,-127)rotate(-30)" text-anchor="middle"&gt;best&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(165, 81, 148);" transform="translate(-16,-29)rotate(60)" text-anchor="middle"&gt;came&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(206, 109, 189);" transform="translate(238,-30)rotate(-30)" text-anchor="middle"&gt;Powered&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(222, 158, 214);" transform="translate(193,56)rotate(-60)" text-anchor="middle"&gt;SumAll&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(57, 59, 121);" transform="translate(172,97)rotate(30)" text-anchor="middle"&gt;Insights&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(82, 84, 163);" transform="translate(-120,-45)rotate(-60)" text-anchor="middle"&gt;nouveaux&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(107, 110, 207);" transform="translate(229,74)rotate(-30)" text-anchor="middle"&gt;goodies&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(156, 158, 222);" transform="translate(-142,-108)rotate(-60)" text-anchor="middle"&gt;SudOuest&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(99, 121, 57);" transform="translate(-181,90)rotate(0)" text-anchor="middle"&gt;sont&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(140, 162, 82);" transform="translate(90,-147)rotate(-30)" text-anchor="middle"&gt;arrivées&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(181, 207, 107);" transform="translate(234,160)rotate(-30)" text-anchor="middle"&gt;Attrapez&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(206, 219, 156);" transform="translate(54,32)rotate(30)" text-anchor="middle"&gt;fini&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(140, 109, 49);" transform="translate(48,-94)rotate(30)" text-anchor="middle"&gt;JavaEE8&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(189, 158, 57);" transform="translate(38,35)rotate(-60)" text-anchor="middle"&gt;MVC&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(231, 186, 82);" transform="translate(-284,56)rotate(-30)" text-anchor="middle"&gt;spec&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(231, 203, 148);" transform="translate(7,-192)rotate(30)" text-anchor="middle"&gt;GlassFish&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(132, 60, 57);" transform="translate(-275,108)rotate(30)" text-anchor="middle"&gt;image&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(173, 73, 74);" transform="translate(-124,98)rotate(30)" text-anchor="middle"&gt;80808080&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(214, 97, 107);" transform="translate(404,-19)rotate(30)" text-anchor="middle"&gt;glassfishozark&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(231, 150, 156);" transform="translate(-22,96)rotate(-30)" text-anchor="middle"&gt;Attention&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(123, 65, 115);" transform="translate(70,160)rotate(60)" text-anchor="middle"&gt;vocabulaire&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(165, 81, 148);" transform="translate(245,0)rotate(30)" text-anchor="middle"&gt;technique&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(206, 109, 189);" transform="translate(-138,22)rotate(-30)" text-anchor="middle"&gt;hier&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(222, 158, 214);" transform="translate(121,71)rotate(60)" text-anchor="middle"&gt;TF1&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(57, 59, 121);" transform="translate(-217,-64)rotate(0)" text-anchor="middle"&gt;premier&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(82, 84, 163);" transform="translate(-319,-94)rotate(-30)" text-anchor="middle"&gt;linformatique&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(107, 110, 207);" transform="translate(-96,248)rotate(-30)" text-anchor="middle"&gt;breizhCamp&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(156, 158, 222);" transform="translate(-432,4)rotate(-60)" text-anchor="middle"&gt;définitivement&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(99, 121, 57);" transform="translate(-326,161)rotate(60)" text-anchor="middle"&gt;lévénement&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(140, 162, 82);" transform="translate(48,-19)rotate(-30)" text-anchor="middle"&gt;manquer&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(181, 207, 107);" transform="translate(337,230)rotate(-60)" text-anchor="middle"&gt;félicitations&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(206, 219, 156);" transform="translate(159,7)rotate(60)" text-anchor="middle"&gt;organisateurs&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(140, 109, 49);" transform="translate(-407,77)rotate(60)" text-anchor="middle"&gt;Matinale&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(189, 158, 57);" transform="translate(182,-190)rotate(0)" text-anchor="middle"&gt;Manager&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(231, 186, 82);" transform="translate(-408,-164)rotate(60)" text-anchor="middle"&gt;différemment&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(231, 203, 148);" transform="translate(80,-2)rotate(30)" text-anchor="middle"&gt;AMI&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(132, 60, 57);" transform="translate(423,-114)rotate(60)" text-anchor="middle"&gt;MoreHumanPartners&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(173, 73, 74);" transform="translate(268,31)rotate(-60)" text-anchor="middle"&gt;visite&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(214, 97, 107);" transform="translate(-3,103)rotate(60)" text-anchor="middle"&gt;chez&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(231, 150, 156);" transform="translate(-18,-156)rotate(0)" text-anchor="middle"&gt;avant&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(123, 65, 115);" transform="translate(-329,104)rotate(30)" text-anchor="middle"&gt;synergies&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(165, 81, 148);" transform="translate(-88,2)rotate(-60)" text-anchor="middle"&gt;magazine&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(206, 109, 189);" transform="translate(-223,26)rotate(30)" text-anchor="middle"&gt;Notre&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(222, 158, 214);" transform="translate(-253,79)rotate(60)" text-anchor="middle"&gt;Ville&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(57, 59, 121);" transform="translate(45,-199)rotate(0)" text-anchor="middle"&gt;badminton&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(82, 84, 163);" transform="translate(156,245)rotate(0)" text-anchor="middle"&gt;tennisdetable&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(107, 110, 207);" transform="translate(-48,-68)rotate(-30)" text-anchor="middle"&gt;News&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(156, 158, 222);" transform="translate(-249,179)rotate(0)" text-anchor="middle"&gt;stories&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(99, 121, 57);" transform="translate(51,-210)rotate(0)" text-anchor="middle"&gt;thanks&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(140, 162, 82);" transform="translate(-216,-80)rotate(-30)" text-anchor="middle"&gt;Safari&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(181, 207, 107);" transform="translate(280,78)rotate(60)" text-anchor="middle"&gt;missing&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(206, 219, 156);" transform="translate(-139,-195)rotate(-30)" text-anchor="middle"&gt;historique&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(140, 109, 49);" transform="translate(-103,-37)rotate(-60)" text-anchor="middle"&gt;Jadore&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(189, 158, 57);" transform="translate(267,-133)rotate(0)" text-anchor="middle"&gt;domaine&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(231, 186, 82);" transform="translate(-429,-115)rotate(60)" text-anchor="middle"&gt;manekinekko&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(231, 203, 148);" transform="translate(213,-62)rotate(0)" text-anchor="middle"&gt;Encore&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(132, 60, 57);" transform="translate(-66,-34)rotate(0)" text-anchor="middle"&gt;effort&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(173, 73, 74);" transform="translate(282,55)rotate(60)" text-anchor="middle"&gt;presque&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(214, 97, 107);" transform="translate(-266,-125)rotate(-30)" text-anchor="middle"&gt;million&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(231, 150, 156);" transform="translate(130,-79)rotate(-60)" text-anchor="middle"&gt;vues&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(123, 65, 115);" transform="translate(163,-49)rotate(-60)" text-anchor="middle"&gt;Telerik&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(165, 81, 148);" transform="translate(431,29)rotate(-30)" text-anchor="middle"&gt;NativeScript&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(206, 109, 189);" transform="translate(-165,-239)rotate(0)" text-anchor="middle"&gt;framework&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(222, 158, 214);" transform="translate(208,22)rotate(30)" text-anchor="middle"&gt;open&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(57, 59, 121);" transform="translate(274,-110)rotate(-30)" text-anchor="middle"&gt;source&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(82, 84, 163);" transform="translate(-275,-267)rotate(60)" text-anchor="middle"&gt;développer&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(107, 110, 207);" transform="translate(-440,-99)rotate(60)" text-anchor="middle"&gt;applications&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(156, 158, 222);" transform="translate(190,88)rotate(30)" text-anchor="middle"&gt;mobiles&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(99, 121, 57);" transform="translate(-356,-272)rotate(30)" text-anchor="middle"&gt;multiplateforme&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(140, 162, 82);" transform="translate(215,105)rotate(-60)" text-anchor="middle"&gt;fking&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(181, 207, 107);" transform="translate(194,-87)rotate(60)" text-anchor="middle"&gt;create&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(206, 219, 156);" transform="translate(-122,7)rotate(0)" text-anchor="middle"&gt;webapp&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(140, 109, 49);" transform="translate(-69,-105)rotate(0)" text-anchor="middle"&gt;used&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(189, 158, 57);" transform="translate(-387,176)rotate(60)" text-anchor="middle"&gt;months&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(231, 186, 82);" transform="translate(-250,2)rotate(-30)" text-anchor="middle"&gt;didnt&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(231, 203, 148);" transform="translate(-100,-95)rotate(60)" text-anchor="middle"&gt;expect&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(132, 60, 57);" transform="translate(239,177)rotate(0)" text-anchor="middle"&gt;writing&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(173, 73, 74);" transform="translate(126,19)rotate(0)" text-anchor="middle"&gt;docs&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(214, 97, 107);" transform="translate(154,57)rotate(-30)" text-anchor="middle"&gt;forces&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(231, 150, 156);" transform="translate(-23,-89)rotate(-30)" text-anchor="middle"&gt;come&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(123, 65, 115);" transform="translate(181,-172)rotate(0)" text-anchor="middle"&gt;better&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(165, 81, 148);" transform="translate(6,-142)rotate(60)" text-anchor="middle"&gt;APIs&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(206, 109, 189);" transform="translate(76,254)rotate(-60)" text-anchor="middle"&gt;Pourquoi&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(222, 158, 214);" transform="translate(-335,-131)rotate(60)" text-anchor="middle"&gt;springxd&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(57, 59, 121);" transform="translate(-154,100)rotate(-60)" text-anchor="middle"&gt;saml&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(82, 84, 163);" transform="translate(-311,-62)rotate(60)" text-anchor="middle"&gt;ldap&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(107, 110, 207);" transform="translate(-134,-212)rotate(-30)" text-anchor="middle"&gt;cloudera&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(156, 158, 222);" transform="translate(406,-50)rotate(0)" text-anchor="middle"&gt;hortonwor&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(99, 121, 57);" transform="translate(315,-16)rotate(-60)" text-anchor="middle"&gt;Jedi&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(140, 162, 82);" transform="translate(397,-89)rotate(30)" text-anchor="middle"&gt;breath&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(181, 207, 107);" transform="translate(104,-81)rotate(30)" text-anchor="middle"&gt;fresh&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(206, 219, 156);" transform="translate(-74,175)rotate(-60)" text-anchor="middle"&gt;spent&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(140, 109, 49);" transform="translate(-429,-32)rotate(-60)" text-anchor="middle"&gt;Weblogic&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(189, 158, 57);" transform="translate(-184,-176)rotate(-60)" text-anchor="middle"&gt;Platform&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(231, 186, 82);" transform="translate(-205,-122)rotate(-60)" text-anchor="middle"&gt;Ops&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(231, 203, 148);" transform="translate(-53,9)rotate(-60)" text-anchor="middle"&gt;Build&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(132, 60, 57);" transform="translate(-283,184)rotate(-60)" text-anchor="middle"&gt;deploy&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(173, 73, 74);" transform="translate(-404,3)rotate(0)" text-anchor="middle"&gt;manage&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(214, 97, 107);" transform="translate(147,-140)rotate(30)" text-anchor="middle"&gt;apps&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(231, 150, 156);" transform="translate(-141,-88)rotate(-60)" text-anchor="middle"&gt;across&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(123, 65, 115);" transform="translate(-132,40)rotate(60)" text-anchor="middle"&gt;Ill&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(165, 81, 148);" transform="translate(243,-213)rotate(-30)" text-anchor="middle"&gt;presenting&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(206, 109, 189);" transform="translate(-216,98)rotate(0)" text-anchor="middle"&gt;Zero&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(222, 158, 214);" transform="translate(314,-44)rotate(-60)" text-anchor="middle"&gt;Hero&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(57, 59, 121);" transform="translate(331,169)rotate(60)" text-anchor="middle"&gt;WebSocket&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(82, 84, 163);" transform="translate(-434,58)rotate(-60)" text-anchor="middle"&gt;SpringOne&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(107, 110, 207);" transform="translate(395,30)rotate(0)" text-anchor="middle"&gt;2015&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(156, 158, 222);" transform="translate(-199,-264)rotate(30)" text-anchor="middle"&gt;Washington&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(99, 121, 57);" transform="translate(244,17)rotate(60)" text-anchor="middle"&gt;Load&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(140, 162, 82);" transform="translate(-9,254)rotate(-60)" text-anchor="middle"&gt;balancing&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(181, 207, 107);" transform="translate(-19,-70)rotate(-60)" text-anchor="middle"&gt;coreos&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(206, 219, 156);" transform="translate(27,175)rotate(60)" text-anchor="middle"&gt;confd&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(140, 109, 49);" transform="translate(-234,-159)rotate(-30)" text-anchor="middle"&gt;nginx&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(189, 158, 57);" transform="translate(-362,-193)rotate(0)" text-anchor="middle"&gt;Décidément&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(231, 186, 82);" transform="translate(258,-261)rotate(-60)" text-anchor="middle"&gt;Stéphane&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(231, 203, 148);" transform="translate(7,-39)rotate(-60)" text-anchor="middle"&gt;coups&lt;/text&gt;&lt;text style="font-size: 10px; font-family: Impact; fill: rgb(132, 60, 57);" transform="translate(-71,149)rotate(-30)" text-anchor="middle"&gt;Bravo&lt;/text&gt;&lt;/g&gt;&lt;/svg&gt;&lt;/p&gt;
+&lt;h1&gt;Pour conclure (temporairement)&lt;/h1&gt;
+&lt;p&gt;Bien sûr, tout ceci est faisable plus simplement avec des outils classiques,  mais on a commencé à manipuler une chaîne complète de traitement (collecte, stockage, traitement simple, visualisation) dans un environnement hautement scalable (spark + cassandra), sans hadoop (et tout cela pour le moment tourne sur ma machine).&lt;/p&gt;
+&lt;h2&gt;teasing&lt;/h2&gt;
+&lt;p&gt;La prochaine fois, on tire profit de spark et des librairies de machine learning pour faire du clustering !&lt;/p&gt;</summary><category term="scala"></category><category term="spark"></category><category term="cassandra"></category><category term="bigdata"></category><category term="talend"></category></entry><entry><title>Spark Cassandra Connector</title><link href="http://danc.github.io/spark-cassandra-connector.html" rel="alternate"></link><updated>2015-05-07T00:00:00+02:00</updated><author><name>Daniel</name></author><id>tag:danc.github.io,2015-05-07:spark-cassandra-connector.html</id><summary type="html">&lt;p&gt;Plein de buzzwords !&lt;/p&gt;
+&lt;p&gt;Le challenge du jour était de commencer à mettre en place toutes ces jolies briques prises séparément pour commencer à se faire une idée précise de comment faire du bigdata en dehors de hadoop, avec :&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;une base de donnée noSQL répartie (Cassandra)&lt;/li&gt;
+&lt;li&gt;un framework de requêtage (Spark)  : dispose aussi de librairies SQL-like, d'algorithmes de machine learning, de capacités de temps réel, ...&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Comme j'ai des ressources limitées, je fais tout tourner en local, pas de config de prod pour le moment.&lt;/p&gt;
+&lt;h1&gt;Mise en place de Cassandra&lt;/h1&gt;
+&lt;p&gt;Pour cela j'ai suivi un bon &lt;a href="https://academy.datastax.com/courses/installing-and-configuring-cassandra"&gt;tutoriel de Datastax&lt;/a&gt; (au passage leur cours sur l'architecture Cassandra est excellent, pour maîtriser les concepts de base)&lt;/p&gt;
+&lt;p&gt;Au final, démarrage de cassandra en local :&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;  cassandra/bin/cassandra -f
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Appel d'un shell interactif de programmation CQL  (language de requêtage de type SQL, mais sans jointures, etc...). Pour les gens pressés, ce genre de requêtage avancé, non disponible en général dans les bases noSQL, se fera justement avec Spark ou SparkSQL.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;  cassandra/bin/cqlsh
+
+  #Quelques commandes CQL :
+  DESCRIBE keyspaces;
+
+    CREATE KEYSPACE DCO WITH REPLICATION = {&amp;#39;class&amp;#39;: &amp;#39;SimpleStrategy&amp;#39; , &amp;#39;replication_factor&amp;#39;: 1};
+
+    use DCO;
+
+    CREATE TABLE users (
+      user_id int PRIMARY KEY, 
+      fname text, 
+      lname text
+    );
+
+    INSERT INTO users (user_id,  fname, lname) 
+      VALUES (1745, &amp;#39;john&amp;#39;, &amp;#39;smith&amp;#39;);
+    INSERT INTO users (user_id,  fname, lname) 
+      VALUES (1744, &amp;#39;john&amp;#39;, &amp;#39;doe&amp;#39;);
+    INSERT INTO users (user_id,  fname, lname) 
+      VALUES (1746, &amp;#39;john&amp;#39;, &amp;#39;smith&amp;#39;);
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h1&gt;Mise en place de Spark&lt;/h1&gt;
+&lt;p&gt;Relativement simple, en partant du &lt;a href="http://spark.apache.org/downloads.html"&gt;site officiel&lt;/a&gt;, on arrive à récupérer une version prête à tourner, il suffit de décompresser le .tgz fourni (mais vous pouvez vous le contruire à partir des sources, bien sûr ...)&lt;/p&gt;
+&lt;p&gt;pour ma part, j'ai pris la version spark-1.3.0-bin-hadoop2.4.tgz&lt;/p&gt;
+&lt;p&gt;Lancement d'un shell interactif (en scala) :&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt; bin/spark-shell
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Lancement d'un shell interactif (en python) :&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt; bin/pyspark
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Il est possible d'invoquer les librairies spark en Java, bien sûr.&lt;/p&gt;
+&lt;h1&gt;Connecteur Spark-Cassandra&lt;/h1&gt;
+&lt;p&gt;Jusque là, pas de difficulté particulière pour  mettre en place les briques de base. 
+Spark ne possède pas par défaut d'interface native avec des bases de donnée. Un connecteur est développé par Datastax, qui permet de fournir les outils de base pour le big Data, sans focément se reposer sur une infrastructure de type hadoop.&lt;/p&gt;
+&lt;p&gt;Le principe de mise en oeuvre du connecteur spark-cassandra est simple : on appelle spark-shell en lui fournissant des librairies (.jar) supplémentaires permettant d'accéder à une base de type cassandra. ( &lt;a href="Exemple ici"&gt;http://christopher-batey.blogspot.fr/2015/01/spark-cassandra-basics-connecting-to.html&lt;/a&gt;)&lt;/p&gt;
+&lt;p&gt;Sauf que après plusieurs essais avec diverses versions récupérés pré-compilées, des erreurs lors de l'invocation de la librairie laissaient entendre qu'il manquait toujours une dépendance, ou que la version de telle ou telle brique n'était pas conforme.
+Après beaucoup d'essais/erreur,  (y compris en essayant d'utiliser DSE Datastax Enterprise, qui est censé intégrer tout cela, mais que je n'ai pas pris le temps de faire fonctionner correctement),  je laisse tomber cette piste, et reviens aux fondamentaux des briques opensources :&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;La recompilation&lt;/em&gt; !&lt;/p&gt;
+&lt;p&gt;La page du projet qui m'a permis d'avancer :&lt;/p&gt;
+&lt;p&gt;https://github.com/datastax/spark-cassandra-connector/blob/master/doc/13_spark_shell.md&lt;/p&gt;
+&lt;p&gt;En gros, récupération du source, téléchargement des dépendances (merci les proxys d'entreprise ...), installation des outils de compilation java que je n'avais pas encore (merci Ubuntu !), et au bout d'un moment, le message de confirmation de la compilation, et les beaux .jar tous neufs disponibles sous spark-cassandra-connector/target/scala-2.10&lt;/p&gt;
+&lt;p&gt;Lancement du spark-shell :&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;                bin/spark-shell --jars /home/daniel/spark-cassandra-connector-master/spark-cassandra-connector/target/scala-2.10/spark-cassandra-connector-assembly-1.3.0-SNAPSHOT.jar,/home/daniel/spark-cassandra-connector-master/spark-cassandra-connector-java/target/scala-2.10/spark-cassandra-connector-java-assembly-1.3.0-SNAPSHOT.jar --conf spark.cassandra.connection.host=127.0.0.1
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;une fois le prompt scala&amp;gt; disponible :&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;                &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;com.datastax.spark.connector._&lt;/span&gt; &lt;span class="o"&gt;//&lt;/span&gt;&lt;span class="n"&gt;Imports&lt;/span&gt; &lt;span class="n"&gt;basic&lt;/span&gt; &lt;span class="n"&gt;rdd&lt;/span&gt; &lt;span class="n"&gt;functions&lt;/span&gt;
+                &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;com.datastax.spark.connector.cql._&lt;/span&gt; &lt;span class="o"&gt;//&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;Optional&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="n"&gt;Imports&lt;/span&gt; &lt;span class="n"&gt;java&lt;/span&gt; &lt;span class="n"&gt;driver&lt;/span&gt; &lt;span class="n"&gt;helper&lt;/span&gt; &lt;span class="n"&gt;functions&lt;/span&gt;
+                &lt;span class="n"&gt;val&lt;/span&gt; &lt;span class="n"&gt;rdd&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;sc&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;cassandraTable&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;dco&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;table1&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+                &lt;span class="n"&gt;rdd&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;toArray&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;foreach&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;println&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;On accède aux données d'une table précédemment créé sous cassandra / CQL !&lt;/p&gt;
+&lt;p&gt;Il est possible d'invoquer directement des commandes CQL depuis spark, bien sûr :&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;                val c = CassandraConnector(sc.getConf)
+                c.withSessionDo ( session =&amp;gt; session.execute(&amp;quot;CREATE KEYSPACE test WITH replication={&amp;#39;class&amp;#39;:&amp;#39;SimpleStrategy&amp;#39;, &amp;#39;replication_factor&amp;#39;:1}&amp;quot;))
+                c.withSessionDo ( session =&amp;gt; session.execute(&amp;quot;CREATE TABLE test.fun (k int PRIMARY KEY, v int)&amp;quot;))
+                sc.parallelize(1 to 100).map( x =&amp;gt; (x,x)).saveToCassandra(&amp;quot;test&amp;quot;,&amp;quot;fun&amp;quot;)
+                sc.cassandraTable(&amp;quot;test&amp;quot;,&amp;quot;fun&amp;quot;).take(3)
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Voilà pour une première mise en place, on va pouvoir faire des choses plus complexes ... (à suivre)&lt;/p&gt;</summary><category term="scala"></category><category term="spark"></category><category term="cassandra"></category><category term="bigdata"></category></entry><entry><title>Notes scala</title><link href="http://danc.github.io/notes-scala.html" rel="alternate"></link><updated>2015-02-25T00:00:00+01:00</updated><author><name>Daniel</name></author><id>tag:danc.github.io,2015-02-25:notes-scala.html</id><summary type="html">&lt;p&gt;&lt;a href="http://confreaks.tv/videos/pnws2014-apache-spark-i-from-scala-collections-to-fast-interactive-big-data-with-spark"&gt;source&lt;/a&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt; scala&amp;gt; List(1, 3, 5, 7, 9).map(_ * 2)
+ res0: List[Int] = List(2, 6, 10, 14, 18)
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h1&gt;laziness&lt;/h1&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;scala&amp;gt; List(1, 3, 5, 7, 9).toStream
+res1: scala.collection.immutable.Stream[Int] = Stream(1, ?)
+
+scala&amp;gt; res1.map(_ * 2)
+res4: scala.collection.immutable.Stream[Int] = Stream(2, ?)
+
+scala&amp;gt; res4.toList
+res5: List[Int] = List(2, 6, 10, 14, 18)
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h1&gt;installation&lt;/h1&gt;
+&lt;p&gt;&lt;a href="http://spark.apache.org/downloads.html"&gt;http://spark.apache.org/downloads.html&lt;/a&gt;&lt;/p&gt;
+&lt;h2&gt;Lancement du shell&lt;/h2&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;sc est défini par défaut (instance de SparkContext)
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h2&gt;Calcul de Pi&lt;/h2&gt;
+&lt;p&gt;https://github.com/apache/spark/blob/master/examples/src/main/scala/org/apache/spark/examples/SparkPi.scala&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;scala.math.random&lt;/span&gt;
+&lt;span class="n"&gt;val&lt;/span&gt; &lt;span class="n"&gt;slices&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;args&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;length&lt;/span&gt; &lt;span class="o"&gt;&amp;gt;&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="n"&gt;args&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;toInt&lt;/span&gt; &lt;span class="k"&gt;else&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;
+&lt;span class="n"&gt;val&lt;/span&gt; &lt;span class="n"&gt;n&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;math&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;min&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="il"&gt;100000L&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;slices&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;Int&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;MaxValue&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;toInt&lt;/span&gt; &lt;span class="o"&gt;//&lt;/span&gt; &lt;span class="n"&gt;avoid&lt;/span&gt; &lt;span class="n"&gt;overflow&lt;/span&gt;
+&lt;span class="n"&gt;val&lt;/span&gt; &lt;span class="n"&gt;count&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;sc&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;parallelize&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt; &lt;span class="n"&gt;until&lt;/span&gt; &lt;span class="n"&gt;n&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;slices&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;map&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt; &lt;span class="n"&gt;i&lt;/span&gt; &lt;span class="o"&gt;=&amp;gt;&lt;/span&gt;
+    &lt;span class="n"&gt;val&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;random&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;
+    &lt;span class="n"&gt;val&lt;/span&gt; &lt;span class="n"&gt;y&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;random&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;
+    &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;y&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;y&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt; &lt;span class="k"&gt;else&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;reduce&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;_&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;_&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="n"&gt;println&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;Pi is roughly &amp;quot;&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="mf"&gt;4.0&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;count&lt;/span&gt; &lt;span class="o"&gt;/&lt;/span&gt; &lt;span class="n"&gt;n&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;# Spark + SQL&lt;/p&gt;
+&lt;p&gt;http://christopher-batey.blogspot.fr/2015/01/spark-cassandra-basics-connecting-to.html&lt;/p&gt;
+&lt;p&gt;cp spark-defaults.conf.template spark-defaults.conf
+daniel@rnslap170-linux:~/spark-1.3.0-bin-hadoop2.4/conf$ nano spark-defaults.conf&lt;/p&gt;
+&lt;p&gt;spark.cassandra.connection.host=127.0.0.1&lt;/p&gt;
+&lt;p&gt;daniel@rnslap170-linux:~/spark-1.3.0-bin-hadoop2.4/conf$ cd ..
+daniel@rnslap170-linux:~/spark-1.3.0-bin-hadoop2.4$ bin/spark-shell --jars lib/spark-cassandra-connector_2.10-1.2.0-rc3.jar &lt;/p&gt;
+&lt;p&gt;import com.datastax.spark.connector._
+ scala&amp;gt; val rdd = sc.cassandraTable("dco", "table1")
+rdd: com.datastax.spark.connector.rdd.CassandraRDD[com.datastax.spark.connector.CassandraRow] = CassandraRDD[0] at RDD at CassandraRDD.scala:49&lt;/p&gt;
+&lt;p&gt;scala&amp;gt; rdd.toArray.foreach(println)&lt;/p&gt;
+&lt;h1&gt;&lt;/h1&gt;
+&lt;p&gt;http://blueplastic.com/databricks/toy_file.txt&lt;/p&gt;
+&lt;p&gt;​
+            val whaleRDD = inputRDD.filter(line =&amp;gt; line.contains("WHALE"))
+            ​
+            val doesRDD = inputRDD.filter(line =&amp;gt; line.contains("does"))
+            doesRDD.count()
+            doesRDD.first()
+            whaleRDD.collect()
+                ​
+val bothRDD = whaleRDD.union(doesRDD)
+​
+val distinctbothRDD = bothRDD.distinct()
+bothRDD.saveAsTextFile("file:///home/ubuntu/bothRDD")&lt;/p&gt;
+&lt;h1&gt;&lt;/h1&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;val rawblocks = sc.textFile(&amp;quot;/home/daniel/tmp/linkage&amp;quot;) # prend tous les fichiers du dossier
+head = rawblocks.take(10)
+rawblocks.first # header du fichier csv
+...
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;res: String = "id_1","id_2","cmp_fname_c1","cmp_fname_c2",...&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;head.foreach(println)
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;...
+"id_1","id_2","cmp_fname_c1","cmp_fname_c2","cmp_lname_c1","cmp_lname_c2",
+"cmp_sex","cmp_bd","cmp_bm","cmp_by","cmp_plz","is_match"
+37291,53113,0.833333333333333,?,1,?,1,1,1,1,0,TRUE
+39086,47614,1,?,1,?,1,1,1,1,1,TRUE
+70031,70237,1,?,1,?,1,1,1,1,1,TRUE
+84795,97439,1,?,1,?,1,1,1,1,1,TRUE
+36950,42116,1,?,1,1,1,1,1,1,1,TRUE
+42413,48491,1,?,1,?,1,1,1,1,1,TRUE
+25965,64753,1,?,1,?,1,1,1,1,1,TRUE
+49451,90407,1,?,1,?,1,1,1,1,0,TRUE
+39932,40902,1,?,1,?,1,1,1,1,1,TRUE&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;head.length
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;res: Int = 9&lt;/p&gt;
+&lt;h2&gt;distinguer les lignes de header contenant id_1&lt;/h2&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;def isHeader(line: String): Boolean = {
+line.contains(&amp;quot;id_1&amp;quot;)
+}
+
+head.filterNot(isHeader).length
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;...
+res: Int = 9&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;  head.filter(x =&amp;gt; !isHeader(x)).length
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;...
+res: Int = 9&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;head.filter(!isHeader(_)).length
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;...
+res: Int = 9&lt;/p&gt;</summary><category term="scala"></category></entry><entry><title>Notes hadoop</title><link href="http://danc.github.io/notes-hadoop.html" rel="alternate"></link><updated>2015-02-24T00:00:00+01:00</updated><author><name>Daniel</name></author><id>tag:danc.github.io,2015-02-24:notes-hadoop.html</id><summary type="html">&lt;p&gt;! Les &lt;a href="/slide/bigdata/2015-02-24-hadoop.html"&gt;slides&lt;/a&gt; sont plus complètes  (work in progress)&lt;/p&gt;
+&lt;h1&gt;Hadoop : bases&lt;/h1&gt;
+&lt;p&gt;Une explication par le &lt;a href="http://hadoop.apache.org/#What+Is+Apache+Hadoop%3F"&gt;projet Apache&lt;/a&gt; lui même :&lt;/p&gt;
+&lt;p&gt;Je retiens de diverses lectures 2 ( ou 3) grands volets :&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Le stockage des données, distribué, scalable&lt;/strong&gt;. &lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Hadoop et ses diverses distributions Cloudera, Hortonworks, Mapr en restent la principale brique, qui semble un socle commun à plein de solutions&lt;/p&gt;
+&lt;p&gt;Note : dans certains cas de traitements temps réel sans besoin de stockage, on peut s'affranchir d'hadoop&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Le traitement des données, parallélisable&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Principalement basés sur un stockage des données hadoop, des tas de librairies (Mahout), algorithmes(MapReduce, Spark, ) , gestionnaires (Ambari, Zookeeper) , infrastructures et langages (Hive, Pig, Tez, HBase, Cassandra, Storm).... permettent de paralléliser des traitements de données.&lt;/p&gt;
+&lt;p&gt;C'est là qu'il y a une grosse ébullition, beaucoup de technlogies proposées, et qu'il y a besoin d'y voir plus clair (Quelle technologie utiliser pour quelle problématique ?).&lt;/p&gt;
+&lt;p&gt;La maitrise de toutes ces technologies pose question aussi, et je vois un outil comme Talend comme une manière de pouvoir adresser ces technologies de manière homogène, au moins dans les grosses mailles (dans le détail, il y a peut-être des limitations à utiliser une sur-couche comme Talend)&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;La visualisation et la restitution des données&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;C'est le troisième point qui est souvent délaissé, mais qui semble évident pour le client : il veut pouvoir manipuler ses données et les rendre lisibles, si possible de manière interactive et par des non experts, qui ne savent pas forcément au départ ce qu'ils sont venus chercher dans ses méga-données.&lt;/p&gt;
+&lt;h1&gt;Notes diverses :&lt;/h1&gt;
+&lt;p&gt;&lt;a href="http://hugfrance.fr/presentation-de-spark-par-tugdual-sarazin/"&gt;source&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Spark&lt;/strong&gt; : permet de s'affranchir de hadoop/Yarn, fonctionne directement sur Apache Mesos, EC2, ...&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Shark&lt;/strong&gt; : Hive pour Spark (compatible, plus rapide)&lt;/p&gt;
+&lt;p&gt;&lt;a href="http://mahout.apache.org/"&gt;source&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Mahout : 25 April 2014 - Goodbye MapReduce&lt;/strong&gt; :&lt;/p&gt;
+&lt;p&gt;Les algorithmes Mahout en MapReduce seront remplacés progressivement par des algos en Spark (au delà de la v0.9, donc)&lt;/p&gt;</summary><category term="hadoop"></category><category term="bigdata"></category></entry><entry><title>Mongo DB cheat sheet</title><link href="http://danc.github.io/mongo-db-cheat-sheet.html" rel="alternate"></link><updated>2014-12-01T00:00:00+01:00</updated><author><name>Daniel</name></author><id>tag:danc.github.io,2014-12-01:mongo-db-cheat-sheet.html</id><summary type="html">&lt;p&gt;&lt;a href="http://docs.mongodb.org/manual/"&gt;MongoDB Manual&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;Client mongoDB multiplateforme (ok sous Ubuntu 14.04) : &lt;a href="http://robomongo.org"&gt;Robomongo&lt;/a&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="x"&gt;db.flights.find( &lt;/span&gt;&lt;span class="cp"&gt;{&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;Origin.airport&amp;quot;&lt;/span&gt; &lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;Livingston Municipal&amp;quot;&lt;/span&gt;&lt;span class="cp"&gt;}&lt;/span&gt;&lt;span class="x"&gt;)&lt;/span&gt;
+
+&lt;span class="x"&gt;db.flights.find(&lt;/span&gt;&lt;span class="cp"&gt;{}&lt;/span&gt;&lt;span class="x"&gt;, &lt;/span&gt;&lt;span class="cp"&gt;{&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;Origin.airport&amp;quot;&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="m"&gt;1&lt;/span&gt; &lt;span class="cp"&gt;}&lt;/span&gt;&lt;span class="x"&gt;)&lt;/span&gt;
+
+
+&lt;span class="x"&gt;db.flights.find(&lt;/span&gt;&lt;span class="cp"&gt;{&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;Carrier.code&amp;#39;&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="cp"&gt;{&lt;/span&gt;&lt;span class="nv"&gt;$nin&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;WN&amp;#39;&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;US&amp;#39;&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;OH&amp;#39;&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;OO&amp;#39;&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;UA&amp;#39;&lt;/span&gt; &lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;XE&amp;#39;&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;YV&amp;#39;&lt;/span&gt;&lt;span class="o"&gt;]&lt;/span&gt;&lt;span class="cp"&gt;}}&lt;/span&gt;&lt;span class="x"&gt;, &lt;/span&gt;&lt;span class="cp"&gt;{&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;_id&amp;quot;&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;Carrier.description&amp;quot;&lt;/span&gt; &lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="m"&gt;1&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;Carrier.code&amp;quot;&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="m"&gt;1&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;Origin.airport&amp;quot;&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="m"&gt;1&lt;/span&gt;&lt;span class="cp"&gt;}&lt;/span&gt;&lt;span class="x"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;</summary><category term="mongodb"></category></entry><entry><title>OVF tool</title><link href="http://danc.github.io/ovf-tool.html" rel="alternate"></link><updated>2013-02-08T00:00:00+01:00</updated><author><name>Daniel</name></author><id>tag:danc.github.io,2013-02-08:ovf-tool.html</id><summary type="html">&lt;p&gt;eminder to use ovftool to create an ova / ovf image of a virtual
+machine with VMWare player.&lt;br /&gt;
+The tool seem provided with WMWare Player (e.g. under Windows)&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="n"&gt;C&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="n"&gt;Files&lt;/span&gt; &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;x86&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;&lt;span class="n"&gt;Player&lt;/span&gt;&lt;span class="o"&gt;\\&lt;/span&gt;&lt;span class="n"&gt;OVFTool&lt;/span&gt;&lt;span class="o"&gt;\\&lt;/span&gt;&lt;span class="n"&gt;ovftool&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;exe&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;h&lt;/span&gt;
+
+&lt;span class="n"&gt;ovftool&lt;/span&gt; &lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="n"&gt;options&lt;/span&gt;&lt;span class="o"&gt;]&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="n"&gt;source&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&lt;/span&gt; &lt;span class="o"&gt;[&amp;lt;&lt;/span&gt;&lt;span class="n"&gt;target&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;]&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;So, to make a .ova file of your vm :&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;ovftool Source.vmx Destination.ova
+&lt;/pre&gt;&lt;/div&gt;</summary><category term="VMware"></category><category term="OVF"></category></entry><entry><title>MySQL mémento</title><link href="http://danc.github.io/mysql-memento.html" rel="alternate"></link><updated>2012-10-11T00:00:00+02:00</updated><author><name>Daniel</name></author><id>tag:danc.github.io,2012-10-11:mysql-memento.html</id><summary type="html">&lt;p&gt;Un petit mémento de différentes commandes :  &lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;Vérification des accès pour les utilisateurs:&lt;/p&gt;
+&lt;p&gt;use mysql;&lt;br /&gt;
+select Host, User from user;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;</summary><category term="MySQL"></category></entry><entry><title>Adventures of an (ex)-developper in the world of application</title><link href="http://danc.github.io/adventures-of-an-ex-developper-in-the-world-of-application.html" rel="alternate"></link><updated>2012-06-18T00:00:00+02:00</updated><author><name>Daniel</name></author><id>tag:danc.github.io,2012-06-18:adventures-of-an-ex-developper-in-the-world-of-application.html</id><summary type="html">&lt;p&gt;management  &lt;/p&gt;
+&lt;p&gt;After more than one year as project manager on a portal for a new offer
+in the cloud, some thoughts and impressions of this new experience :&lt;/p&gt;
+&lt;h2&gt;The good&lt;/h2&gt;
+&lt;p&gt;I was really impressed by the teams I met here.&lt;br /&gt;
+Even if always running out of time, most people take the time to
+explain, guide you trough the maze of networks and processes and
+tools.&lt;br /&gt;
+Event though I would have appreciated a sort of nearly impossible to
+build ’welcome package’, I rarely felt dead-end in front of an
+impossible solution.&lt;br /&gt;
+And of course, the technical and organizational skills were as high as I
+could expect. (with enough decontraction and fun to put the pressure at
+a reasonable level).&lt;br /&gt;
+Thanks to all for that !&lt;/p&gt;
+&lt;p&gt;As an old programmer, I am convinced of the importance of testing and
+documentation, but it’s far more obvious when you manage an application
+:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;rule1 : the environment is never the same as the developer’s one :
+be prepared ! Test platforms are your friends : take care of them.  &lt;/li&gt;
+&lt;li&gt;rule2 : the installer is not a programmer and can’t aways adapt your
+code to the platform : have a good and exhaustive documentation !&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2&gt;The bad&lt;/h2&gt;
+&lt;p&gt;Ok, no welcome package for the newcomer, but still the impression of a
+multitude of tools, process, networks, sometimes for the same
+functionality.&lt;br /&gt;
+The impression of learning to swim in a huge pool is sometimes strong.&lt;/p&gt;
+&lt;dl&gt;
+&lt;dt&gt;As an ex-developper, I may have a biased perception in the make-vs-buy&lt;/dt&gt;
+&lt;dt&gt;debate.&lt;/dt&gt;
+&lt;dt&gt;Of course, we can’t always reinvent the wheel, we have to go fast on new&lt;/dt&gt;
+&lt;dt&gt;markets, and concentrate the effort on added-value.&lt;/dt&gt;
+&lt;dt&gt;But I still believe that a close proximity with coding experience allows&lt;/dt&gt;
+&lt;dd&gt;&lt;/dd&gt;
+&lt;/dl&gt;
+&lt;ul&gt;
+&lt;li&gt;reactivity  &lt;/li&gt;
+&lt;li&gt;innovation  &lt;/li&gt;
+&lt;li&gt;better understanding of the technical limitations  &lt;/li&gt;
+&lt;li&gt;better response to end-user expectations  &lt;/li&gt;
+&lt;li&gt;less vendor lock-in&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2&gt;The ugly&lt;/h2&gt;
+&lt;p&gt;Most of the time, requesting a flow opening is a seamless experience,
+but it may sometimes transform as the ugliest experience in your worst
+nightmares.&lt;/p&gt;
+&lt;p&gt;As a naïve requester, I have no idea of the firewalls and networks
+crossed by my IP packets (nothing about that in the welcome package).&lt;br /&gt;
+I would highly appreciate a single kiosk to post my request, with
+network experts relaying the request from end-to-end.&lt;br /&gt;
+This would be more gratifying for everyone, and less time consuming !
+(and better sleeping)&lt;/p&gt;
+&lt;p&gt;However, it’s still a great experience to deploy a portal for thousands
+of users in the next years !&lt;/p&gt;</summary><category term="en"></category></entry><entry><title>Steve Jobs et Smalltalk</title><link href="http://danc.github.io/steve-jobs-et-smalltalk.html" rel="alternate"></link><updated>2011-11-29T00:00:00+01:00</updated><author><name>Daniel</name></author><id>tag:danc.github.io,2011-11-29:steve-jobs-et-smalltalk.html</id><summary type="html">&lt;p&gt;On lit pas mal d’
+&lt;a href="http://www.kelblog.com/article-lisez-la-bio-de-steve-jobs-90594655.html"&gt;articles&lt;/a&gt;
+et de bouquins sur la vie et l’oeuvre de Steve Jobs, j’aimerais apporter
+une petite pierre à l’édifice en pointant un épisode qui me semble
+fondateur :&lt;br /&gt;
+La mythique démo de Smalltalk par &lt;a href="http://en.wikipedia.org/wiki/Adele_Goldberg_%28computer_scientist%29"&gt;Adele
+Goldberg&lt;/a&gt;
+(Xerox Parc, chef de projet de l’environnement Smalltalk chez Xerox) à
+Steve Jobs et son équipe.&lt;/p&gt;
+&lt;p&gt;On peut en retrouver une trace dans le film de Bob Cringely ‘The Triumph
+of the Nerds’ (Les Cinglés de l’informatique) dont on peut trouver une
+retranscription ici :&lt;/p&gt;
+&lt;p&gt;&lt;a href="http://www.pbs.org/nerds/part3.html"&gt;http://www.pbs.org/nerds/part3.html&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;Steve Jobs est interviewé dans le film et déclare :&lt;/p&gt;
+&lt;p&gt;“And they showed me really three things. But I was so blinded by the
+first one I didn’t even really see the other two.&lt;/p&gt;
+&lt;p&gt;One of the things they showed me was object orienting programming they
+showed me that but I didn’t even see that.&lt;/p&gt;
+&lt;p&gt;The other one they showed me was a networked computer system…they had
+over a hundred Alto computers all networked using email etc., etc., I
+didn’t even see that.&lt;/p&gt;
+&lt;p&gt;I was so blinded by the first thing they showed me which was the
+graphical user interface.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;I thought it was the best thing I’d ever seen in my life.&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;Now remember it was very flawed, what we saw was incomplete, they’d
+done a bunch of things wrong.&lt;/p&gt;
+&lt;p&gt;But we didn’t know that at the time but still though they had the germ
+of the idea was there and they’d done it very well and within you know
+ten minutes it was obvious to me that all computers would work like this
+some day.”&lt;/p&gt;
+&lt;p&gt;It was a turning-point. Jobs decided that this was the way forward for
+Apple.&lt;/p&gt;</summary><category term="Apple"></category><category term="Smalltalk"></category><category term="Goldberg"></category><category term="Xerox"></category><category term="Jobs"></category><category term="Citations"></category></entry><entry><title>LVM memento</title><link href="http://danc.github.io/lvm-memento.html" rel="alternate"></link><updated>2011-07-20T00:00:00+02:00</updated><author><name>Daniel</name></author><id>tag:danc.github.io,2011-07-20:lvm-memento.html</id><summary type="html">&lt;p&gt;lien: &lt;a href="http://doc.ubuntu-fr.org/lvm"&gt;http://doc.ubuntu-fr.org/lvm&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;Un petit mémento des principales commandes LVM :  &lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;liste des commandes relatives aux volumes physiques :  &lt;/p&gt;
+&lt;p&gt;man -k pv&lt;br /&gt;
+ pvdisplay&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;liste des commandes relatives aux groupes de volumes :  &lt;/p&gt;
+&lt;p&gt;man -k vg&lt;br /&gt;
+ vgdisplay  &lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;liste des commandes relatives aux volumes logiques :&lt;br /&gt;
+     man -k lv&lt;br /&gt;
+     lvdisplay&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;</summary><category term="RHEL"></category><category term="linux"></category><category term="lvm"></category></entry><entry><title>Gosling at Google</title><link href="http://danc.github.io/gosling-at-google.html" rel="alternate"></link><updated>2011-04-05T00:00:00+02:00</updated><author><name>Daniel</name></author><id>tag:danc.github.io,2011-04-05:gosling-at-google.html</id><summary type="html">&lt;p&gt;“I find myself starting employment at Google today. One of the toughest
+things about life is making choices. I had a hard time saying ‘no’ to a
+bunch of other excellent possibilities. I find it odd that this time I’m
+taking the road more travelled by, but it looks like interesting fun
+with huge leverage.”&lt;/p&gt;
+&lt;p&gt;&lt;a href="http://nighthacks.com/roller/jag/entry/next_step_on_the_road"&gt;http://nighthacks.com/roller/jag/entry/next_step_on_the_road&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;James Gosling, 29/03/2011&lt;/p&gt;</summary><category term="google"></category><category term="java"></category><category term="Citations"></category></entry><entry><title>Tour d’horizon JMeter</title><link href="http://danc.github.io/tour-dhorizon-jmeter.html" rel="alternate"></link><updated>2011-02-11T00:00:00+01:00</updated><author><name>Daniel</name></author><id>tag:danc.github.io,2011-02-11:tour-dhorizon-jmeter.html</id><summary type="html">&lt;p&gt;Une présentation sur l’outil JMeter, faite en un temps record grâce aux
+notes du wiki et à quelques excellentes resources du web ( + l’épluchage
+de la doc officielle).&lt;/p&gt;
+&lt;p&gt;Et le secours de Nicolas qui m’a produit un webservice CXP en un temps
+record !&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Tour d’horizon et pratique JMeter&lt;/li&gt;
+&lt;li&gt;Types de tests de performance&lt;/li&gt;
+&lt;li&gt;Eléments de JMeter&lt;/li&gt;
+&lt;li&gt;Tests de charge&lt;/li&gt;
+&lt;li&gt;Ordre d’exécution&lt;/li&gt;
+&lt;li&gt;Exemple&lt;/li&gt;
+&lt;li&gt;Règles de portée des éléments&lt;/li&gt;
+&lt;li&gt;Mise en pratique - installation&lt;/li&gt;
+&lt;li&gt;Écriture d’un scénario&lt;/li&gt;
+&lt;li&gt;Exemple 1&lt;/li&gt;
+&lt;li&gt;Paramétrage des tests : CSV&lt;/li&gt;
+&lt;li&gt;Exercice : utilisation d’une source CSV&lt;/li&gt;
+&lt;li&gt;Paramétrage des tests&lt;/li&gt;
+&lt;li&gt;Configuration JDBC&lt;/li&gt;
+&lt;li&gt;Echantillon JDBC&lt;/li&gt;
+&lt;li&gt;Exemple : appels JDBC&lt;/li&gt;
+&lt;li&gt;Variabilisation des tests: RegExpr&lt;/li&gt;
+&lt;li&gt;RegExpr : intro&lt;/li&gt;
+&lt;li&gt;RegExpr exemples&lt;/li&gt;
+&lt;li&gt;Regexp : testeur de regexp&lt;/li&gt;
+&lt;li&gt;Exercice: Regexp&lt;/li&gt;
+&lt;li&gt;Echantillon Requête Webservice SOAP&lt;/li&gt;
+&lt;li&gt;Exemple : Web Services&lt;/li&gt;
+&lt;li&gt;Fonctions&lt;/li&gt;
+&lt;li&gt;BeanShell&lt;/li&gt;
+&lt;li&gt;Tirs aveugles&lt;/li&gt;
+&lt;li&gt;Tirs aveugles : ligne de commande&lt;/li&gt;
+&lt;li&gt;Tirs aveugles : summariser&lt;/li&gt;
+&lt;li&gt;Exécution à distance&lt;/li&gt;
+&lt;li&gt;Exécution à distance : batch&lt;/li&gt;
+&lt;li&gt;Exploitation des résultats&lt;/li&gt;
+&lt;li&gt;Enregistreur de données&lt;/li&gt;
+&lt;li&gt;Jmeter et intégration continue&lt;/li&gt;
+&lt;li&gt;Bonnes pratiques 1&lt;/li&gt;
+&lt;li&gt;Bonnes pratiques 2&lt;/li&gt;
+&lt;li&gt;Pour aller plus loin&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr /&gt;
+&lt;p&gt;En finissant les slides, j’apprends que Moubarak n’est plus président.&lt;/p&gt;
+&lt;p&gt;Το έργο αυτό είναι αφιερωμένο στους Αιγυπτίους και Τυνήσιοι Λαών&lt;/p&gt;</summary><category term="jmeter"></category><category term="test"></category><category term="outil"></category><category term="slide"></category></entry><entry><title>Lire un résultat fourni par sonar</title><link href="http://danc.github.io/lire-un-resultat-fourni-par-sonar.html" rel="alternate"></link><updated>2011-01-11T00:00:00+01:00</updated><author><name>Daniel</name></author><id>tag:danc.github.io,2011-01-11:lire-un-resultat-fourni-par-sonar.html</id><summary type="html">&lt;p&gt;Une fois mis en place une infrastructure &lt;a href="/tag/maven"&gt;maven&lt;/a&gt; +
+&lt;a href="/tag/sonar"&gt;Sonar&lt;/a&gt; , mavenisé les projets et piloté leur intégration
+continue via &lt;a href="/tag/hudson"&gt;hudson&lt;/a&gt; ,&lt;br /&gt;
+nous voilà avec des projets analysés par sonar.&lt;/p&gt;
+&lt;p&gt;Un chef de projet avisé demande alors : “ok, comment se lit cette belle
+page sonar pour mon projet ? Que puis-je faire avec ?”&lt;/p&gt;
+&lt;p&gt;Voici donc un début de réponse sous forme de &lt;a href="/slide/sonar-lecture/sonar_lecture.pdf"&gt;slides
+[pdf]&lt;/a&gt;&lt;/p&gt;</summary><category term="sonar"></category></entry><entry><title>Mastering html5 + css3</title><link href="http://danc.github.io/mastering-html5-css3.html" rel="alternate"></link><updated>2010-12-21T00:00:00+01:00</updated><author><name>Daniel</name></author><id>tag:danc.github.io,2010-12-21:mastering-html5-css3.html</id><summary type="html">&lt;p&gt;Bien que totalement amateur et pas doué, j’aime bien, au détour d’un
+site qui m’a accroché l’oeil, regarder le code source de la page et ses
+feuilles de style.&lt;br /&gt;
+C’est la force d’html, on a accès au code source !&lt;/p&gt;
+&lt;p&gt;C’est encore plus sympa d’avoir dans son bureau un vrai pro du sujet,
+qui explique simplement ses recettes par des exemples concrets. Enjoy !&lt;/p&gt;
+&lt;p&gt;&lt;a href="http://debray.jerome.free.fr/"&gt;http://debray.jerome.free.fr/&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href="http://debray-jerome.developpez.com/"&gt;http://debray-jerome.developpez.com/&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;Pour découvrir plein de choses sur HTML5 et CSS3.&lt;/p&gt;
+&lt;p&gt;Et pour en avoir plein les yeux: &lt;a href="http://html5advent.com"&gt;http://html5advent.com&lt;/a&gt; avec des démos
+époustouflantes (mais qui ne fonctionnent pas encore toutes complètement
+avec tous les navigateurs … Ca va venir …)&lt;/p&gt;</summary><category term="collegue"></category><category term="lien"></category><category term="html5"></category><category term="css3"></category></entry><entry><title>Rails bar à la cantine</title><link href="http://danc.github.io/rails-bar-a-la-cantine.html" rel="alternate"></link><updated>2010-12-13T00:00:00+01:00</updated><author><name>Daniel</name></author><id>tag:danc.github.io,2010-12-13:rails-bar-a-la-cantine.html</id><summary type="html">&lt;p&gt;Ce lundi, je suis allé voir une présentation de ruby on rails par
+Nicolas Ledez à la &lt;a href="http://www.lacantine-rennes.net/"&gt;Cantine&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;Un premier contact avec la communauté Ruby rennaise, et l’occasion de
+vérifier deux trois trucs :&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;est-ce vrai que les programmeurs ruby écrivent toujours leurs tests
+avant de coder ? (pas tout à fait)&lt;/li&gt;
+&lt;li&gt;est-ce vrai que les programmeurs ruby ont tous des MAC ? (presque)&lt;/li&gt;
+&lt;li&gt;est-ce que les programmeurs ruby sont si jeunes qu’ils ne connaissent
+pas la
+&lt;a href="http://linuxdevcenter.com/pub/a/linux/2001/11/29/ruby.html"&gt;parenté&lt;/a&gt; de
+leur langage avec &lt;a href="http://ruby-doc.org/docs/ProgrammingRuby/"&gt;Smalltalk&lt;/a&gt;
+? (Ca c’est pour assurer la ligne éditoriale sur l’ &lt;em&gt;histoire&lt;/em&gt; des
+langages informatiques)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Plus sérieusement, pas mal de monde dans la salle, beaucoup d’étudiants
+ou jeunes développeurs, dont certains en ruby/rails, quelques
+auto-entrepreneurs, —un miliardaire business angel—, et moi.
+Il existe donc &lt;a href="http://www.dexem.fr/"&gt;quelques&lt;/a&gt;
+&lt;a href="http://www.xilinus.com/"&gt;boites&lt;/a&gt; sur Rennes qui font du développement
+ruby on rails.&lt;/p&gt;
+&lt;p&gt;C’était aussi l’occasion, après avoir joué un peu de mon côté avec ruby,
+de voir les outils, méthodes, une démo live, et quelques astuces ou
+pointeurs intéressants.&lt;/p&gt;
+&lt;p&gt;Nicolas, qui ne se présente pas comme un développeur, mais comme une
+personne qui utilise ruby on rails depuis 6 mois, a fait une
+présentation et un tour d’horizon des possibilités du framework, ainsi
+que :&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;la gestion du code source avec git en local + à distance (repository
+privé ou public sous github)&lt;/li&gt;
+&lt;li&gt;la gestion des dépendances avec bundler (à ne pas confondre avec
+buildr !)&lt;/li&gt;
+&lt;li&gt;les tests unitaires / fonctionnels avec junit/rspec/cucumber&lt;/li&gt;
+&lt;li&gt;le déploiement (hébergement heroku, ou à la main avec apache +
+passenger et capistrano)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;un cycle de développement complet, avec la distinction claire entre
+environnements de dev/test/production par des fichiers de configuration
+générés par le framework rails.&lt;/p&gt;
+&lt;p&gt;Pour faire très rapide, un environnement de développement ruby on rails,
+une fois les outils installés (ruby + gem rails et dépendances) se fait
+en quelques lignes :&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;rails new TaskManager
+cd TaskManager
+bundle install
+rails server
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;&lt;strong&gt;Et voilà&lt;/strong&gt;, un serveur web local intégré permet déjà d’accéder à son
+application sur le port 3000 …&lt;/p&gt;
+&lt;p&gt;Puis on peut raffiner en créant des modèles, controlleurs et leurs vues
+associées par quelques commandes supplémentaires :&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;rails generate scaffold Reunions title:string description:text
+rails generate controller … … …
+rails generate view … … …
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;( à compléter)&lt;/p&gt;
+&lt;p&gt;L’ajout de quelques gems (= librairies) comme &lt;code&gt;will_paginate&lt;/code&gt; ou
+&lt;code&gt;devise&lt;/code&gt; permettent respectivement d’ajouter simplement de la pagination
+ou la gestion d’authentification à l’application.&lt;/p&gt;
+&lt;p&gt;En fin de soirée, quelques discussions sur les tests ( creuser la
+différence entre rspec et cucumber, qui semblent indifféremment utilisés
+pour des TUs ou des tests d’intégration).&lt;/p&gt;
+&lt;p&gt;Nicolas a &lt;a href="http://www.rennesonrails.com/?p=288"&gt;mis en ligne&lt;/a&gt; le code de
+sa démo, ainsi que quelques pointeurs.&lt;/p&gt;
+&lt;p&gt;&lt;a href="http://www.scribd.com/doc/45336428/Rails-bar-12"&gt;Les slides&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;En conclusion, un framework qui permet de développer rapidement des
+applications, avec des librairies riches et une communauté active.&lt;/p&gt;
+&lt;p&gt;Framework
+&lt;a href="http://fr.wikipedia.org/wiki/Mod%C3%A8le-Vue-Contr%C3%B4leur"&gt;MVC&lt;/a&gt; et
+&lt;a href="http://fr.wikipedia.org/wiki/REST"&gt;REST&lt;/a&gt; de base.&lt;/p&gt;
+&lt;p&gt;Merci Nicolas !&lt;/p&gt;
+&lt;hr /&gt;
+&lt;p&gt;Note to self : dans la même veine, voir &lt;a href="http://www.springsource.org/roo"&gt;Spring
+ROO&lt;/a&gt; ,
+&lt;a href="http://www.grails.org/"&gt;Grails&lt;/a&gt;, et
+&lt;a href="http://www.playframework.org/"&gt;playframework&lt;/a&gt;&lt;/p&gt;</summary><category term="ruby"></category><category term="rails"></category><category term="cantine"></category><category term="lacnr"></category></entry><entry><title>Les réseaux, Internet, simplement</title><link href="http://danc.github.io/les-reseaux-internet-simplement.html" rel="alternate"></link><updated>2010-12-07T00:00:00+01:00</updated><author><name>Daniel</name></author><id>tag:danc.github.io,2010-12-07:les-reseaux-internet-simplement.html</id><summary type="html">&lt;p&gt;Initialement intitulé &lt;em&gt;Internet pour les nuls&lt;/em&gt; , une excellente
+présentation du réseau et des protocoles, accessible à des non
+techniciens :&lt;/p&gt;
+&lt;p&gt;&lt;a href="http://www.inlibroveritas.net/lire/oeuvre33335.html"&gt;Les réseaux, Internet,
+simplement&lt;/a&gt; , par
+Nicolas Leroux&lt;/p&gt;</summary><category term="lien"></category><category term="collegue"></category><category term="livre"></category></entry><entry><title>Passer un projet Flex sous maven + sonar</title><link href="http://danc.github.io/passer-un-projet-flex-sous-maven-sonar.html" rel="alternate"></link><updated>2010-12-07T00:00:00+01:00</updated><author><name>Daniel</name></author><id>tag:danc.github.io,2010-12-07:passer-un-projet-flex-sous-maven-sonar.html</id><summary type="html">&lt;p&gt;Après la mise en place d’un proxy nexus ( &lt;a href="/wiki/#Installation_nexus"&gt;notes d’installation sur le
+wiki&lt;/a&gt; ), l’étape suivante consiste à tester
+la mise en place de maven + sonar sur un projet Flex existant.&lt;/p&gt;
+&lt;p&gt;On suppose que le poste développeur est configuré pour &lt;a href="/slide/maven-nexus-sonar/#11"&gt;pointer sur le
+nexus local&lt;/a&gt; .&lt;/p&gt;
+&lt;p&gt;les remarques suivantes porteront sur les étapes principales pour que le
+projet compile sous maven :&lt;br /&gt;
+&lt;em&gt; affinage du pom.xml&lt;br /&gt;
+&lt;/em&gt; déclaration des repositories/artifacts nécessaires dans le nexus&lt;/p&gt;
+&lt;p&gt;On ne gèrera pas tous les détails propres au projet (paramètres, i18n,
+…). L’objectif est que les commandes suivantes passent :&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt; mvn compile  
+ mvn package  
+ mvn sonar:sonar
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h1&gt;Organisation du projet&lt;/h1&gt;
+&lt;p&gt;On suppose que le projets est composé de trois modules , un en java, les
+deux autres en flex.&lt;/p&gt;
+&lt;p&gt;La première étape consiste à créer un pom.xml à la racine de chacun de
+ces trois modules.&lt;br /&gt;
+On les mettra au point séparément, avant de déclarer un pom global au
+projet qui ne fera que référencer chacun des modules.&lt;/p&gt;
+&lt;p&gt;Pour les modules Flex, on utilisera le modèle de pom généré par un
+archetype flex-mojos :&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;mvn archetype:generate
+
+-DarchetypeRepository=http://repository.sonatype.org/content/groups/flexgroup/  
+ -DarchetypeGroupId=org.sonatype.flexmojos  
+ -DarchetypeArtifactId=flexmojos-archetypes-application  
+ -DarchetypeVersion=3.0.0
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Le fichier xml ainsi généré sera du genre:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nt"&gt;&amp;lt;project&lt;/span&gt; &lt;span class="na"&gt;xmlns=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;http://maven.apache.org/POM/4.0.0&amp;quot;&lt;/span&gt; 
+    &lt;span class="na"&gt;xmlns:xsi=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;http://www.w3.org/2001/XMLSchema-instance&amp;quot;&lt;/span&gt;
+    &lt;span class="na"&gt;xsi:schemaLocation=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;http://maven.apache.org/POM/4.0.0 &lt;/span&gt;
+&lt;span class="s"&gt;        http://maven.apache.org/maven-v4_0_0.xsd&amp;quot;&lt;/span&gt;&lt;span class="nt"&gt;&amp;gt;&lt;/span&gt;  
+ &lt;span class="nt"&gt;&amp;lt;modelVersion&amp;gt;&lt;/span&gt;4.0.0&lt;span class="nt"&gt;&amp;lt;/modelVersion&amp;gt;&lt;/span&gt;  
+ &lt;span class="nt"&gt;&amp;lt;parent&amp;gt;&lt;/span&gt;  
+ &lt;span class="nt"&gt;&amp;lt;groupId&amp;gt;&lt;/span&gt;org.sonatype.flexmojos&lt;span class="nt"&gt;&amp;lt;/groupId&amp;gt;&lt;/span&gt;  
+ &lt;span class="nt"&gt;&amp;lt;artifactId&amp;gt;&lt;/span&gt;flexmojos-flex-super-pom&lt;span class="nt"&gt;&amp;lt;/artifactId&amp;gt;&lt;/span&gt;  
+ &lt;span class="nt"&gt;&amp;lt;version&amp;gt;&lt;/span&gt;3.0.0&lt;span class="nt"&gt;&amp;lt;/version&amp;gt;&lt;/span&gt;  
+ &lt;span class="nt"&gt;&amp;lt;/parent&amp;gt;&lt;/span&gt;
+
+ &lt;span class="nt"&gt;&amp;lt;groupId&amp;gt;&lt;/span&gt;YOURPROJECT&lt;span class="nt"&gt;&amp;lt;/groupId&amp;gt;&lt;/span&gt;  
+ &lt;span class="nt"&gt;&amp;lt;artifactId&amp;gt;&lt;/span&gt;YOURARTIFACT&lt;span class="nt"&gt;&amp;lt;/artifactId&amp;gt;&lt;/span&gt;  
+ &lt;span class="nt"&gt;&amp;lt;version&amp;gt;&lt;/span&gt;1.0-SNAPSHOT&lt;span class="nt"&gt;&amp;lt;/version&amp;gt;&lt;/span&gt;  
+ &lt;span class="nt"&gt;&amp;lt;packaging&amp;gt;&lt;/span&gt;swf&lt;span class="nt"&gt;&amp;lt;/packaging&amp;gt;&lt;/span&gt;
+
+ &lt;span class="nt"&gt;&amp;lt;name&amp;gt;&lt;/span&gt;Test Flex Maven&lt;span class="nt"&gt;&amp;lt;/name&amp;gt;&lt;/span&gt;  
+ &lt;span class="nt"&gt;&amp;lt;/project&amp;gt;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;L’appel de maven nous permet de trouver pas à pas les modifications à
+apporter à la structure du code :&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;respect de l’arborescenve maven attendue pour un projet flex (
+src/main/flex )  &lt;/li&gt;
+&lt;li&gt;déclaration des dépendences&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Par exemple pour un projet Flex qui dépendait d’une librairie Cairngorm
+particulière :&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nt"&gt;&amp;lt;dependencies&amp;gt;&lt;/span&gt;  
+ &lt;span class="nt"&gt;&amp;lt;dependency&amp;gt;&lt;/span&gt;  
+ &lt;span class="nt"&gt;&amp;lt;groupId&amp;gt;&lt;/span&gt;com.adobe.cairngorm.business&lt;span class="nt"&gt;&amp;lt;/groupId&amp;gt;&lt;/span&gt;  
+ &lt;span class="nt"&gt;&amp;lt;artifactId&amp;gt;&lt;/span&gt;ServiceLocator&lt;span class="nt"&gt;&amp;lt;/artifactId&amp;gt;&lt;/span&gt;  
+ &lt;span class="nt"&gt;&amp;lt;version&amp;gt;&lt;/span&gt;2.2.1&lt;span class="nt"&gt;&amp;lt;/version&amp;gt;&lt;/span&gt;  
+ &lt;span class="nt"&gt;&amp;lt;type&amp;gt;&lt;/span&gt;swc&lt;span class="nt"&gt;&amp;lt;/type&amp;gt;&lt;/span&gt;  
+ &lt;span class="nt"&gt;&amp;lt;scope&amp;gt;&lt;/span&gt;compile&lt;span class="nt"&gt;&amp;lt;/scope&amp;gt;&lt;/span&gt;  
+ &lt;span class="nt"&gt;&amp;lt;/dependency&amp;gt;&lt;/span&gt;  
+&lt;span class="nt"&gt;&amp;lt;/dependencies&amp;gt;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;On peut noter que par rapport à un projet &lt;strong&gt;ant&lt;/strong&gt;, &lt;strong&gt;maven&lt;/strong&gt; se contente
+de déclarer les dépendances dont le projet a besoin, alors que &lt;strong&gt;ant&lt;/strong&gt; a
+besoin de décrire en détail la façon dont les dépendances doivent être
+prises en compte.&lt;br /&gt;
+On verra plus loin comment prendre en compte effectivement une librairie
+externe dans notre repository.&lt;/p&gt;
+&lt;h1&gt;Modifications des pom.xml&lt;/h1&gt;
+&lt;p&gt;Le module java était déjà “mavenisé”, il comportait déjà un pom.xml&lt;br /&gt;
+On pourra toutefois le simplifier en supprimant les déclarations des
+repositories, qui sont dans notre optique gérés par nexus.&lt;/p&gt;
+&lt;p&gt;|règle #1 : alléger au maximum le pom.xml, en remontant un maximum
+d’informations dans les poms parents, ou dans le repository manager|&lt;/p&gt;
+&lt;h1&gt;Déclarer un artifact dans le repository&lt;/h1&gt;
+&lt;p&gt;On a vu plus haut que les dépendances étaient simplement déclarées dans
+le pom.xml. Ces dépendances peuvent&lt;br /&gt;
+&lt;em&gt; appartenir à un repository maven identifié&lt;br /&gt;
+&lt;/em&gt; être fournies en tant que librairie autonome (.jar, .swc, …)&lt;/p&gt;
+&lt;p&gt;Dans le premier cas, on peut déclarer le repository correspondant dans
+le pom.xml, mais en application de la règle #1, on préférera laisser ce
+travail au gestionnaire de repository local (nexus dans notre cas).&lt;br /&gt;
+Cela permet d’appliquer une politique cohérente de gestion des
+dépendances au niveau de l’entreprise, au détriment toutefois d’une
+certaine souplesse laissée aux développeurs.&lt;br /&gt;
+Si un projet a besoin d’une librairie particulière ou d’un repository
+non encode géré par nexus, l’équipe devra s’adresser au gestionnaire de
+nexus pour qu’il donne accès aux repository/librairies concernées pour
+le projet.&lt;/p&gt;
+&lt;p&gt;On ne rentrera pas ici dans la gestion complète d’un nexus par exemple,
+mais on décrira simplement l’ajoutd ’une librairie Flex .swc dans nexus.
+La librairie demandée (Cairngorm_2.2.1.swc) n’est pas référencée dans
+un repository maven connu : on va donc la déclarer explicitement dans
+nexus, la rendant ainsi potentiellement disponible à tous les projets.&lt;/p&gt;
+&lt;dl&gt;
+&lt;dt&gt;Pour satisfaire la dépendance décrite plus haut (le projet utilise la&lt;/dt&gt;
+&lt;dt&gt;classe ServiceLocator dans le package com.adobe.cairngorm.business, le&lt;/dt&gt;
+&lt;dt&gt;tout étant fourni par un fichier Cairngorm_2.2.1.swc) , on ajoutera&lt;/dt&gt;
+&lt;dt&gt;dans le repository ’third party’ (Repository/third party/Artifact&lt;/dt&gt;
+&lt;dt&gt;upload) de nexus le fichier swc, accompagné de la description suivante&lt;/dt&gt;
+&lt;dd&gt;* groupId (com.adobe.cairngorm.business)&lt;br /&gt;
+* artifactId (ServiceLocator)&lt;br /&gt;
+* version (2.2.1)&lt;br /&gt;
+* type (swc)&lt;/dd&gt;
+&lt;/dl&gt;
+&lt;p&gt;&lt;A HREF="/img/nexus-upload-artifact.jpg" class="highslide" onclick="return hs.expand(this)"&gt;Copie
+d’écran correspondante à l’ajout manuel d’un artifact&lt;/A&gt;&lt;/p&gt;
+&lt;p&gt;Il est aussi possible d’affectuer cette manipulation en ligne de
+commande avec maven:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;mvn deploy:deploy-file  
+ -DgroupId=com.adobe.cairngorm.business  
+ -DartifactId=ServiceLocator  
+ -Dversion=2.2.1  
+ -Dpackaging=swc  
+ -Dfile=/path/to/Cairngorm\_2.2.1.swc  
+ -Durl=http://nexus-rennes.sii.fr/content/repositories/thirdparty  
+ -DrepositoryId=thirdparty
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Il est alors nécessaire de demander sous nexus une réindexation du
+repository (thirdparty et public, qui inclut par défaut thirdparty),
+afin que les nouveaux artifacts soient effectivement accessibles aux
+équipes qui dont la configuration maven pointe sur le répoertoire public
+(http://nexus-rennes.sii.fr/content/groups/public/).&lt;/p&gt;
+&lt;p&gt;On peut constater que l’on peut gérer autant de repositories maven que
+nécessaires et attribuer des accès différenciés en fonction des droits,
+des besoins des équipes, …&lt;/p&gt;
+&lt;h1&gt;Un bilan temporaire&lt;/h1&gt;
+&lt;p&gt;A ce niveau, chaque module passe sous maven, une fois les dépendances
+correctement décrites et les repositories mis à jour (ajout d’artifacts
+manquants, ajout de nouveaux repositories + réindexation).&lt;/p&gt;
+&lt;p&gt;Dans la mesure ou sonar est installé (en local ou dans le réseau de
+l’entreprise), &lt;strong&gt;&lt;a href="http://docs.codehaus.org/display/SONAR/Flex+Plugin"&gt;avec le plugin
+Flex&lt;/a&gt; installé&lt;/strong&gt;&lt;br /&gt;
+ on peut déjà invoquer sonar à partir de maven :&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;mvn sonar:sonar
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Les projets flex, pour bénéficier d’outils d’analyse propres à Flex, ont
+besoin de déclarer quelques propriétés dans le pom.xml, exemple :&lt;br /&gt;
+&lt;em&gt; déclaration du langage pour que sonar détermine les règles
+syntaxiques à appliquer au code&lt;br /&gt;
+&lt;/em&gt; paramètres d’analyse&lt;br /&gt;
+* gestion du code source dans Sonar&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt; &lt;span class="nt"&gt;&amp;lt;properties&amp;gt;&lt;/span&gt;  
+ &lt;span class="nt"&gt;&amp;lt;sonar.language&amp;gt;&lt;/span&gt;flex&lt;span class="nt"&gt;&amp;lt;/sonar.language&amp;gt;&lt;/span&gt;  
+ &lt;span class="nt"&gt;&amp;lt;sonar.dynamicAnalysis&amp;gt;&lt;/span&gt;false&lt;span class="nt"&gt;&amp;lt;/sonar.dynamicAnalysis&amp;gt;&lt;/span&gt;  
+ &lt;span class="nt"&gt;&amp;lt;sonar.phase&amp;gt;&lt;/span&gt;generate-sources&lt;span class="nt"&gt;&amp;lt;/sonar.phase&amp;gt;&lt;/span&gt;  
+ &lt;span class="nt"&gt;&amp;lt;/properties&amp;gt;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Et le résultat :&lt;/p&gt;
+&lt;p&gt;&lt;A HREF="/img/flex-sonar.jpg" class="highslide" onclick="return hs.expand(this)"&gt;Ecran
+sonar principal : analyse d’un projet Flex&lt;/A&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href="http://docs.codehaus.org/display/SONAR/Collect+data"&gt;Plus de détails sur les paramètres
+sonar&lt;/a&gt;&lt;/p&gt;
+&lt;h1&gt;La suite (et fin ?)&lt;/h1&gt;
+&lt;p&gt;Il est enfin utile de regrouper les différents modules de l’application
+en créant un pom.xml commun à tous les modules qui va les référencer de
+la manière suivante :&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt; &lt;span class="nt"&gt;&amp;lt;modules&amp;gt;&lt;/span&gt;  
+ &lt;span class="nt"&gt;&amp;lt;module&amp;gt;&lt;/span&gt;flex-gui&lt;span class="nt"&gt;&amp;lt;/module&amp;gt;&lt;/span&gt;  
+ &lt;span class="nt"&gt;&amp;lt;module&amp;gt;&lt;/span&gt;java-service&lt;span class="nt"&gt;&amp;lt;/module&amp;gt;&lt;/span&gt;  
+ &lt;span class="nt"&gt;&amp;lt;module&amp;gt;&lt;/span&gt;web-app&lt;span class="nt"&gt;&amp;lt;/module&amp;gt;&lt;/span&gt;  
+ &lt;span class="nt"&gt;&amp;lt;/modules&amp;gt;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;On suppose ici que les modules se trouvent dans les sous répertoires
+immédiats de l’endroit où se trouve le pom.xml parent. Il ne s’agit pas
+de dépendances, (sans quoi on aurait utilisé la notation dédiée), mais
+bien de modules cohérents pour un même projet.&lt;br /&gt;
+Rien n’empêche d’imaginer qu’à terme un module devienne une librairie
+indépendante utilisée par plusieurs projets.&lt;/p&gt;
+&lt;p&gt;Chaque module référencé devra quand à lui pointer sur son pom parent :&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt; &lt;span class="nt"&gt;&amp;lt;parent&amp;gt;&lt;/span&gt;  
+ &lt;span class="nt"&gt;&amp;lt;groupId&amp;gt;&lt;/span&gt;fr.sii.projet-multi-modules&lt;span class="nt"&gt;&amp;lt;/groupId&amp;gt;&lt;/span&gt;  
+ &lt;span class="nt"&gt;&amp;lt;artifactId&amp;gt;&lt;/span&gt;projet-multi-modules&lt;span class="nt"&gt;&amp;lt;/artifactId&amp;gt;&lt;/span&gt;  
+ &lt;span class="nt"&gt;&amp;lt;version&amp;gt;&lt;/span&gt;1.0-SNAPSHOT&lt;span class="nt"&gt;&amp;lt;/version&amp;gt;&lt;/span&gt;  
+ &lt;span class="nt"&gt;&amp;lt;/parent&amp;gt;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;On peut noter que seule la référence groupe/artifact/version est
+nécessaire, et non son chemin relatif.&lt;/p&gt;
+&lt;p&gt;On pourra profiter de l’occasion pour remonter un maximum d’informations
+communes vers le pom parent (version du logiciel en tant que &lt;em&gt;property&lt;/em&gt;,
+gestion des dépendances communes ou &lt;em&gt;dependencyManagement&lt;/em&gt; , … )&lt;br /&gt;
+Afin de ne pas avoir deux parents dans les projets Flex, il a été
+nécessaire de remonter la définition suivante dans le pom parent [1] :&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt; &lt;span class="nt"&gt;&amp;lt;parent&amp;gt;&lt;/span&gt;  
+ &lt;span class="nt"&gt;&amp;lt;groupId&amp;gt;&lt;/span&gt;org.sonatype.flexmojos&lt;span class="nt"&gt;&amp;lt;/groupId&amp;gt;&lt;/span&gt;  
+ &lt;span class="nt"&gt;&amp;lt;artifactId&amp;gt;&lt;/span&gt;flexmojos-flex-super-pom&lt;span class="nt"&gt;&amp;lt;/artifactId&amp;gt;&lt;/span&gt;  
+ &lt;span class="nt"&gt;&amp;lt;version&amp;gt;&lt;/span&gt;3.0.0&lt;span class="nt"&gt;&amp;lt;/version&amp;gt;&lt;/span&gt;  
+ &lt;span class="nt"&gt;&amp;lt;/parent&amp;gt;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Cette définition permet de définir le projet en tant que projet flex, et
+d’utiliser les plugins maven nécessaires. Le fait de le remonter dans le
+pom père ne semble pas avoir d’effet négatif sur le module java.&lt;/p&gt;
+&lt;p&gt;[1] pas de multi héritage dans maven ?&lt;/p&gt;</summary><category term="flex"></category><category term="maven"></category><category term="sonar"></category><category term="nexus"></category></entry><entry><title>Slides industrialisation de la production logicielle</title><link href="http://danc.github.io/slides-industrialisation-de-la-production-logicielle.html" rel="alternate"></link><updated>2010-12-07T00:00:00+01:00</updated><author><name>Daniel</name></author><id>tag:danc.github.io,2010-12-07:slides-industrialisation-de-la-production-logicielle.html</id><summary type="html">&lt;p&gt;Quelques slides présentant les réflexions en cours sur la production de
+logiciel, et des outils pour l’améliorer :&lt;/p&gt;
+&lt;p&gt;&lt;a href="/slide/maven-nexus-sonar/"&gt;/slide/maven-nexus-sonar/&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;Au menu :&lt;br /&gt;
+ * hudson&lt;br /&gt;
+ * sonar&lt;br /&gt;
+ * maven&lt;br /&gt;
+ * nexus&lt;/p&gt;
+&lt;p&gt;Les slides ont été produits avec
+&lt;a href="http://slideshow.rubyforge.org/"&gt;slideshow&lt;/a&gt; (encore du ruby dedans !).&lt;/p&gt;
+&lt;p&gt;On peut changer de diapositive avec les flèches, la barre espace, ou le
+menu déroulant qui apparaît sous la souris en bas à droite du document.&lt;/p&gt;</summary><category term="flex"></category><category term="maven"></category><category term="sonar"></category><category term="nexus"></category><category term="slide"></category><category term="hudson"></category></entry><entry><title>à propos</title><link href="http://danc.github.io/a-propos.html" rel="alternate"></link><updated>2010-12-02T00:00:00+01:00</updated><author><name>Daniel</name></author><id>tag:danc.github.io,2010-12-02:a-propos.html</id><summary type="html">&lt;p&gt;Quelle idée de compiler un interpréteur Lisp en C sur un Amstrad CPC !…&lt;/p&gt;
+&lt;p&gt;Quel idée de développer un librairie de sémaphores “à la Ada” pour une
+machine Lisp ?&lt;/p&gt;
+&lt;p&gt;Et un simulateur de langage d’acteur réparti sur un réseau de machines …&lt;/p&gt;
+&lt;p&gt;J’ai pourtant commis ce genre de choses, il y a fort longtemps, et vous
+pouvez en déduire à peu près mon âge …&lt;/p&gt;
+&lt;p&gt;J’ai ensuite découvert avec beaucoup d’enthousiasme Smalltalk, et j’en
+ai fait à haute dose pendant plus de 10 ans. (et encore de temps en
+temps).&lt;/p&gt;
+&lt;p&gt;Après avoir mis la main sur un CD linux, j’ai repris du plaisir à jouer
+avec des ordinateurs, en pleine liberté et autonomie.&lt;/p&gt;
+&lt;p&gt;Récemment, j’ai découvert Ruby, et dit du mal de C++ et PHP (pardon
+Frédéric).&lt;/p&gt;
+&lt;p&gt;Mais on ne va pas être sectaire, on se connaît à peine …&lt;/p&gt;
+&lt;p&gt;Sinon, je travaille chez &lt;a href="http://www.sii.fr"&gt;SII Rennes&lt;/a&gt;, suis
+&lt;a href="http://www.scrumalliance.org/profiles/70169-cortinovis-daniel"&gt;ScrumMaster
+certifié&lt;/a&gt;
+, architecture logiciel, consultant, curieux.&lt;/p&gt;
+&lt;p&gt;Et plus encore …&lt;/p&gt;
+&lt;p&gt;&lt;a href="http://perso.apec.fr/daniel_cortinovis"&gt;Mon CV est par là&lt;/a&gt;&lt;/p&gt;
+&lt;hr /&gt;
+&lt;p&gt;Au fait, pourquoi un blog chez alwaysdata ?&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;parce que ça a l’air d’être un hébergeur sympa  &lt;/li&gt;
+&lt;li&gt;c’est en France,  &lt;/li&gt;
+&lt;li&gt;et surtout il y a du python et du ruby dedans, et à titre personel,
+ça me plaît bien !  &lt;/li&gt;
+&lt;li&gt;un accès ssh et webdav, c’est pas commun non plus  &lt;/li&gt;
+&lt;li&gt;le défi de tout tenir en 10Mo (&lt;a href="/2010/05/jekyll/"&gt;bye bye,
+wordpress&lt;/a&gt;)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;EDIT 2015 : maintenant c'est &lt;a href="http://getpelican.org"&gt;Pelican&lt;/a&gt;&lt;/p&gt;</summary><category term="presentation"></category><category term="blog"></category></entry><entry><title>Bonjour, le monde !</title><link href="http://danc.github.io/bonjour-le-monde.html" rel="alternate"></link><updated>2010-12-02T00:00:00+01:00</updated><author><name>Daniel</name></author><id>tag:danc.github.io,2010-12-02:bonjour-le-monde.html</id><summary type="html">&lt;p&gt;La réunion de ce matin m’a décidé :&lt;/p&gt;
+&lt;p&gt;Merci &lt;a href="http://www.viadeo.com/fr/profile/nicolas.bulteau"&gt;Nicolas&lt;/a&gt; ,
+j’ouvre un blog perso, orienté vers tout ce qui est technique, codage,
+boulot.&lt;/p&gt;
+&lt;p&gt;Au programme dans la mesure du temps disponible :&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;des langages de programmation (avec de l’histoire dedans …)  &lt;/li&gt;
+&lt;li&gt;des méthodes (agiles de préférence)  &lt;/li&gt;
+&lt;li&gt;des outils qualité&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;En ce moment, je suis en pleine réflexion autour des outils production
+et qualité (intégration continue, hudson, sonar, maven, nexus)&lt;/p&gt;
+&lt;p&gt;Au passage, on peut noter que Nexus tourne officiellement depuis cet
+après-midi.&lt;/p&gt;
+&lt;p&gt;Plus sur le sujet bientôt…&lt;/p&gt;</summary><category term="[ nexus"></category><category term="blog ]"></category></entry></feed>

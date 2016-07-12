@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+      <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="canonical" href="http://danc.github.io/spark-machine-learning.html" />
+
+    <title>  Don't Panic &mdash; Spark Machine Learning
+</title>
+
+
+
+
+    <link rel="stylesheet" href="http://danc.github.io/theme/css/style.css">
+
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+      <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+
+    <meta name="author" content="Daniel">
+    <meta name="description" content="On continue à jouer avec spark / scala / cassandra Résumé des épisodes précédents des tweets ont été récupérés dans une table Cassandra via talend, avec un job simple (voir article précédent) import com.datastax.spark.connector._ val rdd=sc.cassandraTable("dco", "tweets") Après avoir généré un joli nuage de mots ...">
+  <meta name="tags" contents="scala, spark, cassandra, bigdata, machinelearning, lda, ">
+</head>
+
+<body>
+<header class="header">
+  <div class="container">
+    <div class="header-inner">
+      <h1 class="header-name">
+        <a class="nodec" href="http://danc.github.io">Don't Panic</a>
+      </h1>
+      <h3 class="header-text"></h3>
+      <ul class="header-menu list-inline">
+          <li><a class="nodec icon-github" href="https://github.com/danc"></a></li>
+          <li><a class="nodec icon-twitter" href="https://twitter.com/tintouli"></a></li>
+      </ul>
+    </div>
+  </div>
+</header> <!-- /.header -->  <div class="container">
+  <div class="post full-post">
+    <h1 class="post-title">
+      <a href="/spark-machine-learning.html" title="Permalink to Spark Machine Learning">Spark Machine Learning</a>
+    </h1>
+    <ul class="list-inline">
+      <li class="post-date">
+        <a class="text-muted" href="/spark-machine-learning.html" title="2015-05-15T00:00:00+02:00">ven. 15 mai 2015</a>
+      </li>
+      <li class="muted">&middot;</li>
+      <li class="post-category">
+        <a href="http://danc.github.io/category/misc.html">misc</a>
+      </li>
+        <li class="muted">&middot;</li>
+        <li>
+            <a href="http://danc.github.io/tag/scala.html">scala</a>,             <a href="http://danc.github.io/tag/spark.html">spark</a>,             <a href="http://danc.github.io/tag/cassandra.html">cassandra</a>,             <a href="http://danc.github.io/tag/bigdata.html">bigdata</a>,             <a href="http://danc.github.io/tag/machinelearning.html">machinelearning</a>,             <a href="http://danc.github.io/tag/lda.html">lda</a>        </li>
+    </ul>
+    <div class="post-content">
+      <p>On continue à jouer avec spark / scala / cassandra</p>
+<h3>Résumé des épisodes précédents</h3>
+<p>des tweets ont été récupérés dans une table Cassandra via talend, avec un job simple (voir article précédent)</p>
+<div class="highlight"><pre>    <span class="kn">import</span> <span class="nn">com.datastax.spark.connector._</span>
+    <span class="n">val</span> <span class="n">rdd</span><span class="o">=</span><span class="n">sc</span><span class="o">.</span><span class="n">cassandraTable</span><span class="p">(</span><span class="s">&quot;dco&quot;</span><span class="p">,</span> <span class="s">&quot;tweets&quot;</span><span class="p">)</span>
+</pre></div>
+
+
+<p>Après avoir généré un joli nuage de mots à partir de ces données, on se demande si on ne peut pas faire du <em>clustering</em> : regrouper les mots les plus fréquents par thèmes, par groupes de mots revenant plus fréquemment entre eux.</p>
+<h3>Un algorithme de machine learning : LDA</h3>
+<p>Le site officiel de spark donne quelques exemples rapides des différents algorithmes disponibles, et <a href="http://spark.apache.org/docs/latest/mllib-clustering.html#latent-dirichlet-allocation-lda">LDA</a> a attiré mon attention :</p>
+<p>pour plus de détails <a href="http://en.wikipedia.org/wiki/Latent_Dirichlet_allocation">Wikipedia</a></p>
+<p>Il permet de regrouper des ensembles de mots par groupes (en nombre paramétrable, <em>k</em> dans l'algorithme), en fonction de leur proximité/fréquence dans les documents d'origine : un bon moyen de reconstituer les sujets abordé dans un corpus de texte.
+On va essayer de l'appliquer à notre ensemble de tweets !</p>
+<p>Ce que je comprends de l'exemple fourni par spark, et que l'entrée de l'algorithme est un ensemble d'occurrence de mots (quels qu'ils soient), pour tous les documents dont on dispose.
+Cela donne donc un vecteur de nombres (les occurrences des mots d'un dictionnaire) avec en colonne les mots du dictionnaire, en ligne les documents analysés</p>
+<p><strong>Exemple</strong> : </p>
+<p>4 documents analysés, 11 mots en tout dans le dictionnaire</p>
+<p>Le premier document a 1 occurrence du premier mot, 2 occurrences du 2e mot, 6 occurrences du 3e mot, etc ....</p>
+<p>La matrice correspondante est :</p>
+<div class="highlight"><pre>    1 2 6 0 2 3 1 1 0 0 3
+    1 3 0 1 3 0 0 2 0 0 1
+    1 4 1 0 0 4 9 0 1 2 0
+    2 1 0 3 0 0 5 0 2 3 9
+</pre></div>
+
+
+<p>On voit que l'entrée est juste une matrice de chiffres, notre dictionnaire est stocké à part. </p>
+<p>Question : on pourrait faire cela avec le dictionnaire Français, sur l'oeuvre complète de Victor Hugo ? (je garde ça pour un autre jour, et ça ne tournera pas sur ma machine seule ...)</p>
+<h3>Au travail</h3>
+<p>On revient à nos tweets </p>
+<p>On avait vu comment récupérer l'ensemble des mots de tous les tweets : (on ne prend que le texte, et pour chacun, on découpe les mots séparés par des espaces)</p>
+<div class="highlight"><pre>    var words = rdd.select(&quot;text&quot;).as((i: String) =&gt; (i)).flatMap(line =&gt; line.split(&quot; &quot;))
+</pre></div>
+
+
+<p>On a plein de doublons, de mots qui reviennent plusieurs fois. On avait vu comment compter ces occurrences de doublons (en ne gardant que ceux de plus de 2 caractères) :</p>
+<div class="highlight"><pre>    var allWords = words.filter(w =&gt; w.length &gt; 3).map(word =&gt; (word, 1)).reduceByKey(_ + _)
+
+    allWords.collect
+    res157: Array[(String, Int)] = Array((image:,1), (News,1), (épisode,7), (goodies,1), (manquer,1), (synergies,1), (@ISTIC_Entrepren,2), (writing,1), (breizhCamp,1), (#Jedi,1), (APIs,1), (TF1,,1), (#lemans,1), (Mans,5), (components,6), (http://t.co/AiIsjpMAcj,4), (chez,1), (been,1), (This,1), (from:,1), (@FlorentTymen:,3), (Pourquoi,1), (applications,1), (#BigData,7), (Hero,1), (used,1), (breath,1), (&#39;From,1), (application,6), (@steffy_29,1), (magazine,1), (#hadoop,1), (Powered,1), (Data,7), (http://t.co/05rgIJ4H79,2), (oppérationnelle,,2), (historique,1), (vocabulaire,1), (8080:8080,1), (@FlorentTymen,2), (vidéo,2), (million,1), (I&#39;ll,1), (pour,10), (#Docker,1), (@sergialmar:,1), (Sarthe,6), (hard,1), (2015,1), (@manekinekko,4), (#badmint…,3), (#BadSii,4), (#badsii,1), (Stolen,1), (site,...
+</pre></div>
+
+
+<p>Et on ne garde que la première partie de chaque doublon (le mot) :</p>
+<div class="highlight"><pre>    var allMyWords = allWords.map(t =&gt; t._1)
+
+    allMyWords.collect
+    res158: Array[String] = Array(image:, News, épisode, goodies, manquer, synergies, @ISTIC_Entrepren, writing, breizhCamp, #Jedi, APIs, TF1,, #lemans, Mans, components, http://t.co/AiIsjpMAcj, chez, been, This, from:, @FlorentTymen:, Pourquoi, applications, #BigData, Hero, used, breath, &#39;From, application, @steffy_29, magazine, #hadoop, Powered, Data, http://t.co/05rgIJ4H79, oppérationnelle,, historique, vocabulaire, 8080:8080, @FlorentTymen, vidéo, million, I&#39;ll, pour, #Docker, @sergialmar:, Sarthe, hard, 2015, @manekinekko, #badmint…, #BadSii, #badsii, Stolen, site, @RennesAtalante:, http://t.co/Vt3Hx7Azzw, @anssiwilkko:, #SII, @SII_Ouest, @sii_rhonealpes, partenaire, SpringOne, http://t.co/iXf2DQkRnB, #LeMans, Ops., prototypes, better, @vogloblinsky, nouvelle, Créer, it&#39;s, différemment...
+
+    allMyWords.count
+    res162: Long = 328
+</pre></div>
+
+
+<p>On aurait pu aller beaucoup plus vite en dédoublonnant directement :</p>
+<div class="highlight"><pre>    words.filter(w =&gt; w.length &gt; 3).distinct.count
+    res163: Long = 328
+</pre></div>
+
+
+<p>Voilà, on a notre liste de mots distinct, qui nous servira de dictionnaire. Reste maintenant à générer des lignes, pour chaque tweet, comportant l'occurrence de ces mots dans chaque colonne.</p>
+<p><em>Rappel</em> : je débute, je tatonne, il y a probablement moyen de faire plus efficace et plus propre !</p>
+<h3>Un premier tweet</h3>
+<p>On joue un peu avec un premier tweet :</p>
+<div class="highlight"><pre>var firstTweet = rdd.first
+firstTweet.toMap(&quot;text&quot;).toString
+res169: String = RT @mda_sii_ouest: [Updated] Introduction aux web components, des composants HTML5/JavaScript réutilisables http://t.co/iXf2DQkRnB @mda_sii…
+
+firstTweet.toMap(&quot;text&quot;).toString.split(&quot; &quot;)
+
+var ftc = sc.parallelize(firstTweet.toMap(&quot;text&quot;).toString.split(&quot; &quot;)).map(word =&gt; (word, 1)).reduceByKey(_ + _)
+var ftca = ftc.toArray
+res167: Array[(String, Int)] = Array((@mda_sii…,1), (aux,1), (web,1), ([Updated],1), (RT,1), (des,1), (réutilisables,1), (HTML5/JavaScript,1), (components,,1), (http://t.co/iXf2DQkRnB,1), (Introduction,1), (composants,1), (@mda_sii_ouest:,1))
+</pre></div>
+
+
+<p>Pas mal ! On va en faire une fonction qui prend un tweet en entrée, et renvoie les tuples (mot, occurrences) :</p>
+<div class="highlight"><pre>    <span class="nt">def</span> <span class="nt">twitRow</span> <span class="o">(</span><span class="nt">t</span><span class="o">:</span> <span class="nt">com</span><span class="nc">.datastax.spark.connector.CassandraRow</span><span class="o">):</span> <span class="nt">Array</span><span class="cp">[</span><span class="p">(</span><span class="kt">String</span><span class="p">,</span> <span class="nx">Int</span><span class="p">)</span><span class="cp">]</span> <span class="o">=</span> <span class="p">{</span> <span class="n">var</span> <span class="n">ft</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">parallelize</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">toMap</span><span class="p">(</span><span class="s2">&quot;text&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">toString</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">))</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">word</span> <span class="o">=&gt;</span> <span class="p">(</span><span class="n">word</span><span class="o">,</span><span class="m">1</span><span class="p">))</span><span class="o">.</span><span class="n">reduceByKey</span><span class="p">(</span> <span class="n">_</span> <span class="o">+</span> <span class="n">_</span> <span class="p">)</span><span class="o">.</span><span class="n">toArray</span><span class="p">;</span> <span class="n">ft</span>  <span class="p">}</span>
+
+    <span class="nt">twitRow</span><span class="o">(</span><span class="nt">firstTweet</span><span class="o">)</span>
+    <span class="nt">res170</span><span class="o">:</span> <span class="nt">Array</span><span class="cp">[</span><span class="p">(</span><span class="kt">String</span><span class="p">,</span> <span class="nx">Int</span><span class="p">)</span><span class="cp">]</span> <span class="o">=</span> <span class="nt">Array</span><span class="o">((</span><span class="k">@mda_sii</span><span class="err">…</span><span class="o">,</span><span class="nt">1</span><span class="o">),</span> <span class="o">(</span><span class="nt">aux</span><span class="o">,</span><span class="nt">1</span><span class="o">),</span> <span class="o">(</span><span class="nt">web</span><span class="o">,</span><span class="nt">1</span><span class="o">),</span> <span class="o">(</span><span class="cp">[</span><span class="nx">Updated</span><span class="cp">]</span><span class="o">,</span><span class="nt">1</span><span class="o">),</span> <span class="o">(</span><span class="nt">RT</span><span class="o">,</span><span class="nt">1</span><span class="o">),</span> <span class="o">(</span><span class="nt">des</span><span class="o">,</span><span class="nt">1</span><span class="o">),</span> <span class="o">(</span><span class="nt">r</span><span class="err">é</span><span class="nt">utilisables</span><span class="o">,</span><span class="nt">1</span><span class="o">),</span> <span class="o">(</span><span class="nt">HTML5</span><span class="o">/</span><span class="nt">JavaScript</span><span class="o">,</span><span class="nt">1</span><span class="o">),</span> <span class="o">(</span><span class="nt">components</span><span class="o">,,</span><span class="nt">1</span><span class="o">),</span> <span class="o">(</span><span class="nt">http</span><span class="o">://</span><span class="nt">t</span><span class="nc">.co</span><span class="o">/</span><span class="nt">iXf2DQkRnB</span><span class="o">,</span><span class="nt">1</span><span class="o">),</span> <span class="o">(</span><span class="nt">Introduction</span><span class="o">,</span><span class="nt">1</span><span class="o">),</span> <span class="o">(</span><span class="nt">composants</span><span class="o">,</span><span class="nt">1</span><span class="o">),</span> <span class="o">(</span><span class="k">@mda_sii_ouest</span><span class="o">:,</span><span class="nt">1</span><span class="o">))</span>
+</pre></div>
+
+
+<p>On va maintenant génére la ligne correspondant aux mots du dictionnaire, avec les occurrences des mots du premier tweet :</p>
+<div class="highlight"><pre>scala<span class="o">&gt;</span>  allMyWords.map<span class="p">(</span>w <span class="o">=&gt;</span> <span class="p">((</span>s<span class="o">:</span> String<span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span> var res<span class="o">=</span><span class="m">0</span><span class="p">;</span>  <span class="p">(</span><span class="kr">for</span> <span class="p">(</span>j <span class="o">&lt;-</span> Range <span class="p">(</span><span class="m">0</span><span class="p">,</span> ftca.size <span class="p">)</span>  <span class="p">)</span> <span class="p">{</span><span class="kr">if</span> <span class="p">(</span>s <span class="o">==</span> ftca<span class="p">(</span>j<span class="p">)</span><span class="m">.</span>_<span class="m">1</span><span class="p">)</span> <span class="p">{</span>res<span class="o">=</span>ftca<span class="p">(</span>j<span class="p">)</span><span class="m">.</span>_<span class="m">2</span><span class="p">}});</span> res  <span class="p">}</span>   <span class="p">)</span>   <span class="p">(</span>w<span class="p">))</span>
+res171<span class="o">:</span> org.apache.spark.rdd.RDD<span class="p">[</span>Int<span class="p">]</span> <span class="o">=</span> MapPartitionsRDD<span class="p">[</span><span class="m">5834</span><span class="p">]</span> at map at <span class="o">&lt;</span>console<span class="o">&gt;:</span><span class="m">44</span>
+
+scala<span class="o">&gt;</span> res171.collect
+res172<span class="o">:</span> Array<span class="p">[</span>Int<span class="p">]</span> <span class="o">=</span> Array<span class="p">(</span><span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">1</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">1</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">1</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">1</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">1</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">1</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span><span class="kc">...</span>
+</pre></div>
+
+
+<p>Effectivement, dans les tweets, on ne répète que rarement le même mot. On aura au final une matrice assez creuse, avec uniquement des 0 et des 1 (mais plusieurs 1 sur la même colonne : même mot dans plusieurs tweets, comme on l'a vu dans le nuage de mots de l'article précédent)</p>
+<p>A cette occasion, on va compléter notre fonction pour générer la ligne de la matrice pour un tweet :</p>
+<div class="highlight"><pre>    def twitRow2 <span class="p">(</span><span class="kp">t</span><span class="o">:</span> com.datastax.spark.connector.CassandraRow<span class="p">)</span><span class="o">:</span> org.apache.spark.rdd.RDD<span class="p">[</span>Int<span class="p">]</span> <span class="o">=</span> <span class="p">{</span> 
+        var ft <span class="o">=</span> sc.parallelize<span class="p">(</span>t.toMap<span class="p">(</span><span class="s">&quot;text&quot;</span><span class="p">)</span><span class="m">.</span>toString.split<span class="p">(</span><span class="s">&quot; &quot;</span><span class="p">))</span><span class="m">.</span>map<span class="p">(</span>word <span class="o">=&gt;</span> <span class="p">(</span>word<span class="p">,</span><span class="m">1</span><span class="p">))</span><span class="m">.</span>reduceByKey<span class="p">(</span> _ <span class="o">+</span> _ <span class="p">)</span><span class="m">.</span>toArray<span class="p">;</span> 
+         allMyWords.map<span class="p">(</span>w <span class="o">=&gt;</span> <span class="p">((</span>s<span class="o">:</span> String<span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span> var res<span class="o">=</span><span class="m">0</span><span class="p">;</span>  <span class="p">(</span><span class="kr">for</span> <span class="p">(</span>j <span class="o">&lt;-</span> Range <span class="p">(</span><span class="m">0</span><span class="p">,</span> ft.size <span class="p">)</span>  <span class="p">)</span> <span class="p">{</span><span class="kr">if</span> <span class="p">(</span>s <span class="o">==</span> ft<span class="p">(</span>j<span class="p">)</span><span class="m">.</span>_<span class="m">1</span><span class="p">)</span> <span class="p">{</span>res<span class="o">=</span>ft<span class="p">(</span>j<span class="p">)</span><span class="m">.</span>_<span class="m">2</span><span class="p">}});</span> res  <span class="p">}</span>   <span class="p">)</span>   <span class="p">(</span>w<span class="p">))</span>
+    <span class="p">}</span>
+
+    scala<span class="o">&gt;</span> twitRow2<span class="p">(</span>firstTweet<span class="p">)</span><span class="m">.</span>collect
+    res174<span class="o">:</span> Array<span class="p">[</span>Int<span class="p">]</span> <span class="o">=</span> Array<span class="p">(</span><span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">1</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">1</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">1</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">1</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">1</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">1</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span><span class="kc">...</span>
+</pre></div>
+
+
+<p>Bon il y a sûrement moyen de générer directement le Vecteur d'entrée pour l'agorithme LDA, mais je manque un peu de temps (revenez plus tard ...)</p>
+<h3>tous les tweets</h3>
+<p>c'est pas beau mais je suis pressé :</p>
+<div class="highlight"><pre><span class="kr">for</span> <span class="p">(</span>i <span class="o">&lt;-</span> Range <span class="p">(</span><span class="m">0</span><span class="p">,</span> rdd.count.toInt<span class="p">))</span> <span class="p">{</span> twitRow2<span class="p">(</span>rdd.take<span class="p">(</span>i<span class="m">+1</span><span class="p">)(</span>i<span class="p">))</span><span class="m">.</span>foreach<span class="p">(</span><span class="kt">c</span> <span class="o">=&gt;</span> <span class="p">{</span> <span class="kp">print</span><span class="p">(</span><span class="kt">c</span><span class="p">)</span> <span class="p">;</span> <span class="kp">print</span><span class="p">(</span><span class="s">&quot; &quot;</span><span class="p">)});</span> println <span class="p">}</span>
+
+var allMy <span class="o">=</span> allMyWords.toArray
+</pre></div>
+
+
+<h1>LDA</h1>
+<p>On peut maintenant appliquer l'algorithme LDA à notre matrice, préalablement stockée dans un fichier rows.txt</p>
+<p>(pompé directement de l'exemple de spark)</p>
+<div class="highlight"><pre>    <span class="kn">import</span> <span class="nn">org.apache.spark.mllib.clustering.LDA</span>
+    <span class="kn">import</span> <span class="nn">org.apache.spark.mllib.linalg.Vectors</span>
+
+    <span class="o">//</span> <span class="n">Load</span> <span class="ow">and</span> <span class="n">parse</span> <span class="n">the</span> <span class="n">data</span>
+    <span class="n">val</span> <span class="n">data</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">textFile</span><span class="p">(</span><span class="s">&quot;rows.txt&quot;</span><span class="p">)</span>
+    <span class="n">val</span> <span class="n">parsedData</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">s</span> <span class="o">=&gt;</span> <span class="n">Vectors</span><span class="o">.</span><span class="n">dense</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">trim</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39; &#39;</span><span class="p">)</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">_</span><span class="o">.</span><span class="n">toDouble</span><span class="p">)))</span>
+    <span class="o">//</span> <span class="n">Index</span> <span class="n">documents</span> <span class="k">with</span> <span class="n">unique</span> <span class="n">IDs</span>
+    <span class="n">val</span> <span class="n">corpus</span> <span class="o">=</span> <span class="n">parsedData</span><span class="o">.</span><span class="n">zipWithIndex</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">_</span><span class="o">.</span><span class="n">swap</span><span class="p">)</span><span class="o">.</span><span class="n">cache</span><span class="p">()</span>
+
+    <span class="o">//</span> <span class="n">Cluster</span> <span class="n">the</span> <span class="n">documents</span> <span class="n">into</span> <span class="n">three</span> <span class="n">topics</span> <span class="n">using</span> <span class="n">LDA</span>
+    <span class="o">//</span> <span class="n">On</span> <span class="n">d</span><span class="err">é</span><span class="n">finit</span> <span class="n">arbitrairement</span> <span class="mi">3</span> <span class="n">groupes</span> <span class="err">!!!</span>
+    <span class="n">val</span> <span class="n">ldaModel</span> <span class="o">=</span> <span class="n">new</span> <span class="n">LDA</span><span class="p">()</span><span class="o">.</span><span class="n">setK</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">corpus</span><span class="p">)</span>
+
+    <span class="o">//</span> <span class="n">Output</span> <span class="n">topics</span><span class="o">.</span> <span class="n">Each</span> <span class="ow">is</span> <span class="n">a</span> <span class="n">distribution</span> <span class="n">over</span> <span class="n">words</span> <span class="p">(</span><span class="n">matching</span> <span class="n">word</span> <span class="n">count</span> <span class="n">vectors</span><span class="p">)</span>
+    <span class="n">println</span><span class="p">(</span><span class="s">&quot;Learned topics (as distributions over vocab of &quot;</span> <span class="o">+</span> <span class="n">ldaModel</span><span class="o">.</span><span class="n">vocabSize</span> <span class="o">+</span> <span class="s">&quot; words):&quot;</span><span class="p">)</span>
+    <span class="n">val</span> <span class="n">topics</span> <span class="o">=</span> <span class="n">ldaModel</span><span class="o">.</span><span class="n">topicsMatrix</span>
+    <span class="k">for</span> <span class="p">(</span><span class="n">topic</span> <span class="o">&lt;-</span> <span class="n">Range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span> <span class="p">{</span>
+      <span class="k">print</span><span class="p">(</span><span class="s">&quot;Topic &quot;</span> <span class="o">+</span> <span class="n">topic</span> <span class="o">+</span> <span class="s">&quot;:&quot;</span><span class="p">)</span>
+      <span class="k">for</span> <span class="p">(</span><span class="n">word</span> <span class="o">&lt;-</span> <span class="n">Range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">ldaModel</span><span class="o">.</span><span class="n">vocabSize</span><span class="p">))</span> <span class="p">{</span> <span class="k">print</span><span class="p">(</span><span class="s">&quot; &quot;</span> <span class="o">+</span> <span class="n">topics</span><span class="p">(</span><span class="n">word</span><span class="p">,</span> <span class="n">topic</span><span class="p">)</span><span class="o">+</span> <span class="s">&quot; &quot;</span><span class="o">+</span> <span class="n">allMy</span><span class="p">(</span><span class="n">word</span><span class="p">));</span> <span class="p">}</span>
+      <span class="n">println</span><span class="p">()</span>
+    <span class="p">}</span>
+</pre></div>
+
+
+<p>On peut donc obtenir nos 3 groupes, avec, pour chaque mot du dictionnaire, leur coefficient dans le groupe.</p>
+<p>Afin de mieux visualiser, on va stocker ces trois groupes (topics) dans trois collections triées :</p>
+<div class="highlight"><pre>val topic0 <span class="o">=</span>  scala.collection.mutable.Map<span class="p">[</span>Double<span class="p">,</span>String<span class="p">]()</span>
+<span class="kr">for</span> <span class="p">(</span>word <span class="o">&lt;-</span> Range<span class="p">(</span><span class="m">0</span><span class="p">,</span> ldaModel.vocabSize<span class="p">))</span> <span class="p">{</span>  topic0 <span class="o">+=</span> topics<span class="p">(</span>word<span class="p">,</span> <span class="m">0</span><span class="p">)</span> <span class="o">-&gt;</span>  allMy<span class="p">(</span>word<span class="p">)</span> <span class="p">}</span>
+</pre></div>
+
+
+<p>idem pour topic1 et topic2</p>
+<p>Un peu de tri, et on visualise les plus gros scores :</p>
+<h3>topic0 : les mots des Sarthois</h3>
+<div class="highlight"><pre>topic0.toList.sorted foreach { case (key, value) =&gt; println(key + &quot; = &quot; + value)}
+
+4.249550480296365 = @mavillelemans
+4.541434020266467 = développement
+4.61044366402017 = Sarthe
+4.647085683489432 = local
+5.183945645795795 = parler
+5.32725232101005 = continue
+5.4152334597901834 = #LeMans
+5.568853863334123 = @mda_sii_ouest
+6.983978587587469 = @GroupeSII
+9.554092492106358 = @sii_ouest
+</pre></div>
+
+
+<h3>topic1 : le stream technique</h3>
+<div class="highlight"><pre>topic1.toList.sorted foreach { case (key, value) =&gt; println(key + &quot; = &quot; + value)}
+
+
+2.231639628895238 = épisode
+2.2994995186433447 = Data
+2.3420972909813846 = lance
+2.5774724965644165 = [Updated]
+2.6483653997464023 = @GroupeSII
+2.72489202051636 = with
+2.742077593792608 = Polymer
+2.7478357714082873 = pour
+3.029747974954719 = components
+3.0391798897002174 = Créer
+3.293847887133726 = HTML5
+3.5723032989964327 = application
+3.7444349806995456 = avec
+4.020639688007065 = @GroupeSII:
+7.100699838644399 = @mda_sii_ouest
+9.49418210622817 = @sii_ouest
+</pre></div>
+
+
+<h3>topic2 : les RH recrutent</h3>
+<div class="highlight"><pre>topic2.toList.sorted foreach { case (key, value) =&gt; println(key + &quot; = &quot; + value)}
+
+
+3.2071341812997423 = Data
+3.428164742875275 = #Emploi
+3.5862289643239595 = pour
+3.69716968199824 = @GroupeSII:
+3.777836068589731 = #BigData
+3.9479273872750174 = recrute
+4.946934547153257 = [Updated]
+6.951725401665473 = @sii_ouest
+8.330446298021478 = @mda_sii_ouest
+</pre></div>
+
+
+<h2>Petite conclusion temporaire</h2>
+<p>Il faudrait probablement supprimer certains mots du dictionnaire qui reviennent trop souvent dans les trois groupes (normal, c'est comme cela que l'on récupère les tweets chez Twitter):
+@sii_ouest
+@mda_sii_ouest</p>
+<p>Il pourrait être intéressant de jouer avec les paramètres de l'algorithme (nombre de groupes, et autres paramètres globaux), avec plus de volumétrie, plus de tweets, sur d'autres sources, 
+mais cet article est déjà beaucoup trop long, et pour une première c'est pas si mal ....</p>
+<p>Si le sujet vous intéresse, un autre article de <a href="http://blog.xebia.fr/2015/05/11/les-outils-de-la-data-science-spark-mllib-theorie-et-concepts-12/">xebia.fr</a>, qui va beaucoup moins vite, et pose des bases plus saines (mais ils ont plus de temps que moi à consacrer au sujet ?)</p>
+    </div>
+  </div>
+  <hr class="separator">
+  <div class="col-md-8 col-md-offset-2">
+  </div>
+  </div>
+<footer class="footer">
+  <div class="container">
+    <p class="text-center">
+      Daniel, <a href="" target="_blank"></a> unless otherwise noted.
+    </p>
+    <div class="text-center">
+      Generated by <a href="http://getpelican.com" target="_blank">Pelican</a> with the <a href="http://github.com/nairobilug/pelican-alchemy">alchemy</a> theme.
+    </div>
+  </div>
+</footer> <!-- /.footer -->
+  <script src="http://danc.github.io/theme/js/jquery.min.js"></script>
+  <script src="http://danc.github.io/theme/js/bootstrap.min.js"></script>
+</body> <!-- 42 -->
+
+</html>

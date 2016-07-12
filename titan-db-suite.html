@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+      <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="canonical" href="http://danc.github.io/titan-db-suite.html" />
+
+    <title>  Don't Panic &mdash; Titan DB, suite
+</title>
+
+
+
+
+    <link rel="stylesheet" href="http://danc.github.io/theme/css/style.css">
+
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+      <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+
+    <meta name="author" content="Daniel">
+    <meta name="description" content="Définition du modèle On peut définir les noms des relations entre noeuds, avec sa cardinalité, les propriétés, ... Je l'interprète comme une possibilité pour la base d'optimiser les requêtes futures (traversée de graphe) sur la base des noms de relations entre noeuds. Noms des relations mgmt = graph.openManagement() //Relations ...">
+  <meta name="tags" contents="bigdata, graph, ">
+</head>
+
+<body>
+<header class="header">
+  <div class="container">
+    <div class="header-inner">
+      <h1 class="header-name">
+        <a class="nodec" href="http://danc.github.io">Don't Panic</a>
+      </h1>
+      <h3 class="header-text"></h3>
+      <ul class="header-menu list-inline">
+          <li><a class="nodec icon-github" href="https://github.com/danc"></a></li>
+          <li><a class="nodec icon-twitter" href="https://twitter.com/tintouli"></a></li>
+      </ul>
+    </div>
+  </div>
+</header> <!-- /.header -->  <div class="container">
+  <div class="post full-post">
+    <h1 class="post-title">
+      <a href="/titan-db-suite.html" title="Permalink to Titan DB, suite">Titan DB, suite</a>
+    </h1>
+    <ul class="list-inline">
+      <li class="post-date">
+        <a class="text-muted" href="/titan-db-suite.html" title="2016-06-07T00:00:00+02:00">mar. 07 juin 2016</a>
+      </li>
+      <li class="muted">&middot;</li>
+      <li class="post-category">
+        <a href="http://danc.github.io/category/misc.html">misc</a>
+      </li>
+        <li class="muted">&middot;</li>
+        <li>
+            <a href="http://danc.github.io/tag/bigdata.html">bigdata</a>,             <a href="http://danc.github.io/tag/graph.html">graph</a>        </li>
+    </ul>
+    <div class="post-content">
+      <h2>Définition du modèle</h2>
+<p>On peut définir les noms des relations entre noeuds, avec sa cardinalité, les propriétés, ...</p>
+<p>Je l'interprète comme une possibilité pour la base d'optimiser les requêtes futures (traversée de graphe) sur la base des noms de relations entre noeuds.</p>
+<h3>Noms des relations</h3>
+<div class="highlight"><pre>    mgmt = graph.openManagement()
+    //Relations from Customer
+    holds = mgmt.makeEdgeLabel(&#39;holds&#39;).multiplicity(ONE2MANY).make()
+    isLocated = mgmt.makeEdgeLabel(&#39;isLocated&#39;).multiplicity(MULTI).make()
+    contracts = mgmt.makeEdgeLabel(&#39;contracts&#39;).multiplicity(ONE2MANY).make()
+    //Relations from Router
+    isConnectedTo = mgmt.makeEdgeLabel(&#39;isConnectedTo&#39;).multiplicity(MULTI).make()
+    isLoadbalancedBy = mgmt.makeEdgeLabel(&#39;isLoadbalancedBy&#39;).multiplicity(ONE2MANY).make()
+    isCascadedBy = mgmt.makeEdgeLabel(&#39;isCascadedBy&#39;).multiplicity(ONE2MANY).make()
+    isAssociatedTo = mgmt.makeEdgeLabel(&#39;isAssociatedTo&#39;).multiplicity(MANY2ONE).make()
+    //Relations from IS
+    isComposedOf = mgmt.makeEdgeLabel(&#39;isComposedOf&#39;).multiplicity(ONE2MANY).make()
+    isInstalledOn = mgmt.makeEdgeLabel(&#39;isInstalledOn&#39;).multiplicity(MANY2ONE).make()
+    dependsOn = mgmt.makeEdgeLabel(&#39;dependsOn&#39;).multiplicity(MULTI).make()
+    //Relations from SO
+    isSubscribedBy = mgmt.makeEdgeLabel(&#39;isSubscribedBy&#39;).multiplicity(MANY2ONE).make()
+    isProvisionedIn = mgmt.makeEdgeLabel(&#39;isProvisionedIn&#39;).multiplicity(MULTI).make()
+    isDeliveredOn = mgmt.makeEdgeLabel(&#39;isDeliveredOn&#39;).multiplicity(MANY2ONE).make()
+    isRelatedTo = mgmt.makeEdgeLabel(&#39;isRelatedTo&#39;).multiplicity(MANY2ONE).make()
+    isBilledTo = mgmt.makeEdgeLabel(&#39;isBilledTo&#39;).multiplicity(MANY2ONE).make()
+    contains = mgmt.makeEdgeLabel(&#39;contains&#39;).multiplicity(ONE2MANY).make()
+
+    mgmt.commit()
+</pre></div>
+
+
+<h3>Propriétés sur les noeuds</h3>
+<div class="highlight"><pre>    mgmt = graph.openManagement()
+    tacid = mgmt.makePropertyKey(&#39;tacid&#39;).dataType(String.class).cardinality(Cardinality.SINGLE).make()
+    name = mgmt.makePropertyKey(&#39;name&#39;).dataType(String.class).cardinality(Cardinality.SINGLE).make()
+    mgmt.commit()
+</pre></div>
+
+
+<p>Doit être unique dans le système :(pas de doublons entre différents labels ?).</p>
+<p>Noms des propriétés et des relations sont des Relation Types ("Edge labels and property keys are jointly referred to as <strong>relation types</strong>")</p>
+<p>Lister les noms des relations (edges)</p>
+<div class="highlight"><pre>    mgmt.getRelationTypes(EdgeLabel.class)
+    ==&gt;brother
+    ==&gt;composedOf
+    ==&gt;isCascading
+    ==&gt;father
+    ==&gt;mother
+    ==&gt;battled
+    ==&gt;lives
+    ==&gt;pet
+</pre></div>
+
+
+<p>Lister les nom des propriétés des noeuds (PropertyKey)</p>
+<div class="highlight"><pre>    mgmt.getRelationTypes(PropertyKey.class)
+    ==&gt;name
+    ==&gt;age
+    ==&gt;time
+    ==&gt;reason
+    ==&gt;place
+</pre></div>
+
+
+<h3>Labels des noeuds (~ types d'objets)</h3>
+<div class="highlight"><pre>    mgmt = graph.openManagement()
+    router = mgmt.makeVertexLabel(&#39;Router&#39;).make()
+    site = mgmt.makeVertexLabel(&#39;Site&#39;).make()
+    customer = mgmt.makeVertexLabel(&#39;CustomerEntity&#39;).make()
+    is = mgmt.makeVertexLabel(&#39;InstalledService&#39;).make()
+    so = mgmt.makeVertexLabel(&#39;SubscribedOffer&#39;).make()
+    mgmt.commit()
+</pre></div>
+
+
+<h3>Création d'un noeud avec label</h3>
+<div class="highlight"><pre>    tst1 = graph.addVertex(label, &#39;Router&#39;) //Automatically opens a new transaction
+    tst1.property(&quot;id&quot;, &quot;tst1-id&quot;)
+    tst1.property(&quot;name&quot;, &quot;this is my first test name&quot;)
+    graph.tx().commit()
+
+    // fichier
+     is = new File(&#39;.&#39;, &#39;router.csv&#39;).newDataInputStream()
+     is.readLine() // header
+     while (line = is.readLine()) {
+        cols = line.split(&quot;;&quot;)
+        if (g.V().has(&#39;name&#39;, cols[0])) { 
+        // router already declared
+        } else 
+        { // new Router
+        r = graph.addVertex(label, &#39;Router&#39;)
+        r.property(&quot;name&quot;, cols[0])
+        r.property(&quot;tacid&quot;, &quot;10-&quot;+cols[0])
+        }
+     }
+     is.close()
+
+     is2 = new File(&#39;.&#39;,&#39;cust.csv&#39;).newDataInputStream()
+     is2.readLine()
+     while (line = is2.readLine()) {
+        cols = line.split(&#39;¤&#39;)
+        if (g.V().has(&#39;name&#39;, cols[111])) { 
+        } else 
+        { 
+        c = graph.addVertex(label, &#39;CustomerEntity&#39;)
+        c.property(&quot;name&quot;, cols[111])
+        c.property(&quot;tacid&quot;, &quot;10-&quot;+cols[111])
+        }
+     }
+     is2.close()
+
+
+     g.tx().commit()
+     # https://academy.datastax.com/resources/getting-started-tinkerpop-and-gremlin
+     getOrCreate = { l, id -&gt; g.V().has(&#39;name&#39;, id).tryNext().orElseGet { tmp = g.addV(label, l , &#39;name&#39;, id).next(); tmp.property(&#39;tacid&#39;, &quot;10-&quot;+id); tmp}}
+
+// indexation
+mgmt = graph.openManagement()
+name = mgmt.getPropertyKey(&#39;name&#39;)
+mgmt.buildIndex(&#39;byNameComposite&#39;, Vertex.class).addKey(name).buildCompositeIndex()
+mgmt.commit()
+//Wait for the index to become available
+mgmt.awaitGraphIndexStatus(graph, &#39;byNameComposite&#39;).call()
+// Reindex existing objects
+mgmt = graph.openManagement()
+mgmt.updateIndex(mgmt.getGraphIndex(&#39;byNameComposite&#39;), SchemaAction.REINDEX).get()
+mgmt.commit()
+</pre></div>
+    </div>
+  </div>
+  <hr class="separator">
+  <div class="col-md-8 col-md-offset-2">
+  </div>
+  </div>
+<footer class="footer">
+  <div class="container">
+    <p class="text-center">
+      Daniel, <a href="" target="_blank"></a> unless otherwise noted.
+    </p>
+    <div class="text-center">
+      Generated by <a href="http://getpelican.com" target="_blank">Pelican</a> with the <a href="http://github.com/nairobilug/pelican-alchemy">alchemy</a> theme.
+    </div>
+  </div>
+</footer> <!-- /.footer -->
+  <script src="http://danc.github.io/theme/js/jquery.min.js"></script>
+  <script src="http://danc.github.io/theme/js/bootstrap.min.js"></script>
+</body> <!-- 42 -->
+
+</html>

@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+      <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="canonical" href="http://danc.github.io/drafts/installing-cassandra.html" />
+
+    <title>  Don't Panic &mdash; Installing Cassandra
+</title>
+
+
+
+
+    <link rel="stylesheet" href="http://danc.github.io/theme/css/style.css">
+
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+      <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+
+    <meta name="author" content="Daniel">
+    <meta name="description" content="https://academy.datastax.com/courses/installing-and-configuring-cassandra https://academy.datastax.com/courses/installing-configuring-and-manipulating-keyspace/selecting-and-installing-cassandra http://www.datastax.com/dev/blog/ccm-a-development-tool-for-creating-local-cassandra-clusters Java 1.7+ 64 bits Python 2.5+ http://planetcassandra.org/cassandra tar.gz (tout est localisé au même endroit) .deb package : répartit aux endroits usuels # files conf cassandra.yaml ...">
+  <meta name="tags" contents="">
+</head>
+
+<body>
+<header class="header">
+  <div class="container">
+    <div class="header-inner">
+      <h1 class="header-name">
+        <a class="nodec" href="http://danc.github.io">Don't Panic</a>
+      </h1>
+      <h3 class="header-text"></h3>
+      <ul class="header-menu list-inline">
+          <li><a class="nodec icon-github" href="https://github.com/danc"></a></li>
+          <li><a class="nodec icon-twitter" href="https://twitter.com/tintouli"></a></li>
+      </ul>
+    </div>
+  </div>
+</header> <!-- /.header -->  <div class="container">
+  <div class="post full-post">
+    <h1 class="post-title">
+      <a href="/drafts/installing-cassandra.html" title="Permalink to Installing Cassandra">Installing Cassandra</a>
+    </h1>
+    <ul class="list-inline">
+      <li class="post-date">
+        <a class="text-muted" href="/drafts/installing-cassandra.html" title="2015-04-09T00:00:00+02:00">jeu. 09 avril 2015</a>
+      </li>
+      <li class="muted">&middot;</li>
+      <li class="post-category">
+        <a href="http://danc.github.io/category/misc.html">misc</a>
+      </li>
+    </ul>
+    <div class="post-content">
+      <p>https://academy.datastax.com/courses/installing-and-configuring-cassandra
+https://academy.datastax.com/courses/installing-configuring-and-manipulating-keyspace/selecting-and-installing-cassandra</p>
+<p>http://www.datastax.com/dev/blog/ccm-a-development-tool-for-creating-local-cassandra-clusters</p>
+<p>Java 1.7+
+64 bits
+Python 2.5+
+ http://planetcassandra.org/cassandra
+ tar.gz (tout est localisé au même endroit)
+ .deb package : répartit aux endroits usuels
+ # files</p>
+<h2>conf</h2>
+<p>cassandra.yaml</p>
+<p>cassandra-env.sh : HEAP ...</p>
+<p>cassandra-rackdc.properties :  rack, datacenter </p>
+<p>cassandra-topoloy.properties : répartition et duplication des données</p>
+<h2>bin</h2>
+<p>cassandra
+cqlsh
+nodetool</p>
+<h1>Configuring</h1>
+<p>https://academy.datastax.com/courses/installing-configuring-and-manipulating-keyspace/conifguring-cassandra-node</p>
+<h1>Cassandra Architecture</h1>
+<p>https://academy.datastax.com/courses/understanding-cassandra-architecture/introducing-cassandras-node-based-architecture</p>
+<p>cluster_name
+listen_address (localhost)
+commitlog_directory : best practice : on a separate disk in prod (unless SSD)
+data_file_directories
+saved_caches_directories  : index et caches
+rpc_address / rpc_port : listen address for thrift client connction (def localhost / 9160)
+native_transport_port (9042) CQL driver protocol</p>
+<h2>cassandra-env.sh</h2>
+<p>MAX_HEAP_SIZE
+max 8G in prod (java limitations on GC)</p>
+<h1>Set of nodes</h1>
+<p>no SPOF
+node : instance de Cassandra
+partition : one ordered and replicable unit of data on a node
+rack : logicla set of nodes
+datacenter : logical set of racks
+cluster : full set of nodes / racks / datacenter</p>
+<h1>node -&gt; cluster</h1>
+<p>seed available at @IP
+conf/cassandra.yaml</p>
+<p>cluster_name  : shared name (logical)
+seeds :  @IP
+listen_address : @IP</p>
+<h2>Start / stop</h2>
+<p>https://academy.datastax.com/courses/installing-configuring-and-manipulating-keyspace/manually-starting-and-stopping-cassandra</p>
+<div class="highlight"><pre>   cassandra -f (foreground)
+   cassandra -p PID
+</pre></div>
+
+
+<p>ou 
+        service cassandra start / stop</p>
+<h1>CCM</h1>
+<p>https://academy.datastax.com/courses/installing-configuring-and-manipulating-keyspace/using-cassandra-cluster-manager-ccm</p>
+<p>not part of standard distribution, separate tool</p>
+<div class="highlight"><pre>   ccm create cluster1 --cassandra-version 1.2.15  # télécharge, compile
+   ccm list
+   ccm  populate --nodes 3
+   ccm start
+   ccm node2 stop
+   ccm status
+</pre></div>
+
+
+<h1>Request coordination</h1>
+<p>https://academy.datastax.com/courses/understanding-cassandra-architecture/understanding-request-coordination</p>
+<p>coordinator : le node qui reçoit une requête : en charge de propager les infos dans le système, de centraliser la réponse.
+Pas de node privilégié.</p>
+<p>round-robin pattern by default
+drivers : node.js, PHP, perl, go, clojure, haskel, R, ruby, scala</p>
+<p>replication factor : sur combien de nodes on duplique la donnée ?
+replication strategy : quels nodes peuvent recevoir les replicas, comment ? (row, rack, cluster, datacenter )
+consistency level : nb de confirmations (quorum) pour un read:write  (ANY, ONE, QUORUM (RF/2) +1, ALL)</p>
+<h1>Partitioning</h1>
+<p>https://academy.datastax.com/courses/understanding-cassandra-architecture/introducing-partitioning-process</p>
+<p>token : 128 bit ID
+partition : unit of daa storage on a node</p>
+<p>répartition des tokens sur les noeuds, les clés primaires servent à calculer le token, qui sera assigné au premier noeud responsable de ce token.
+Murmur3Partitioner (default)  (cassandra.yaml) doit etre le même pour les nodes du cluster</p>
+<h1>Virtual nodes</h1>
+<p>https://academy.datastax.com/courses/understanding-cassandra-architecture/introducing-virtual-nodes</p>
+<p>bootstrap : node joins cluster and fills with partitions for its primary range
+decommission : node leaves a cluster
+num-tokens num of token ranges per node (def 256)   </p>
+<p>différences pour search ou analytics</p>
+<p>TODO a revoir</p>
+<h1>Replication</h1>
+<p>https://academy.datastax.com/courses/understanding-cassandra-architecture/understanding-replication</p>
+<p>https://academy.datastax.com/courses/understanding-cassandra-architecture/understanding-hinted-handoff</p>
+<p>hints : when the node comes back, data is written later</p>
+<p>https://academy.datastax.com/courses/understanding-cassandra-architecture/introducing-consistency-levels</p>
+<p>consistency level is set for every request
+default : ONE</p>
+<p>passed at each request</p>
+<p>https://academy.datastax.com/courses/understanding-cassandra-architecture/understanding-tunable-consistency</p>
+<p>immediate consistency : highest latency (all replicas checked)
+eventual consistency : lowest latency</p>
+<p>https://academy.datastax.com/courses/understanding-cassandra-architecture/introducing-repair-operations</p>
+<p>read repair  : stale nodes are updates (found a more recent update of the data). occurs on a configurable percentage of reads (default 10%) read-repair_chance 0.1   ALTER TABLE [table] with [property] = [value]
+nodetool repairs  bin/nodtool -h host -p JMX port repair options   (after recovering a failed node, bring a node back online, eriodically with infrequent read nodes, write or delet activity, periodically every gc_grace_seconds 10 days)</p>
+<p>https://academy.datastax.com/courses/understanding-cassandra-architecture/introducing-internode-communications</p>
+<p>gossip protocol : contact 1 to 3 nodes  available ? restart ? where ? load ? bootstrap ?
+contacts seed nodes</p>
+<p>snitch : subsystem to track and report cluster topology</p>
+<p>DESCRIBE keyspaces;</p>
+<p>CREATE KEYSPACE DCO WITH REPLICATION = {'class': 'SimpleStrategy' , 'replication_factor': 1};</p>
+<p>use DCO;</p>
+<p>CREATE TABLE users (
+  user_id int PRIMARY KEY, 
+  fname text, 
+  lname text
+);</p>
+<p>INSERT INTO users (user_id,  fname, lname) 
+  VALUES (1745, 'john', 'smith');
+INSERT INTO users (user_id,  fname, lname) 
+  VALUES (1744, 'john', 'doe');
+INSERT INTO users (user_id,  fname, lname) 
+  VALUES (1746, 'john', 'smith');</p>
+<p>truncate tweets;</p>
+    </div>
+  </div>
+  <hr class="separator">
+  <div class="col-md-8 col-md-offset-2">
+  </div>
+  </div>
+<footer class="footer">
+  <div class="container">
+    <p class="text-center">
+      Daniel, <a href="" target="_blank"></a> unless otherwise noted.
+    </p>
+    <div class="text-center">
+      Generated by <a href="http://getpelican.com" target="_blank">Pelican</a> with the <a href="http://github.com/nairobilug/pelican-alchemy">alchemy</a> theme.
+    </div>
+  </div>
+</footer> <!-- /.footer -->
+  <script src="http://danc.github.io/theme/js/jquery.min.js"></script>
+  <script src="http://danc.github.io/theme/js/bootstrap.min.js"></script>
+</body> <!-- 42 -->
+
+</html>

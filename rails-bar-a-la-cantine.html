@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+      <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="canonical" href="http://danc.github.io/rails-bar-a-la-cantine.html" />
+
+    <title>  Don't Panic &mdash; Rails bar à la cantine
+</title>
+
+
+
+
+    <link rel="stylesheet" href="http://danc.github.io/theme/css/style.css">
+
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+      <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+
+    <meta name="author" content="Daniel">
+    <meta name="description" content="Ce lundi, je suis allé voir une présentation de ruby on rails par Nicolas Ledez à la Cantine. Un premier contact avec la communauté Ruby rennaise, et l’occasion de vérifier deux trois trucs : est-ce vrai que les programmeurs ruby écrivent toujours leurs tests avant de coder ? (pas tout à ...">
+  <meta name="tags" contents="ruby, rails, cantine, lacnr, ">
+</head>
+
+<body>
+<header class="header">
+  <div class="container">
+    <div class="header-inner">
+      <h1 class="header-name">
+        <a class="nodec" href="http://danc.github.io">Don't Panic</a>
+      </h1>
+      <h3 class="header-text"></h3>
+      <ul class="header-menu list-inline">
+          <li><a class="nodec icon-github" href="https://github.com/danc"></a></li>
+          <li><a class="nodec icon-twitter" href="https://twitter.com/tintouli"></a></li>
+      </ul>
+    </div>
+  </div>
+</header> <!-- /.header -->  <div class="container">
+  <div class="post full-post">
+    <h1 class="post-title">
+      <a href="/rails-bar-a-la-cantine.html" title="Permalink to Rails bar à la cantine">Rails bar à la cantine</a>
+    </h1>
+    <ul class="list-inline">
+      <li class="post-date">
+        <a class="text-muted" href="/rails-bar-a-la-cantine.html" title="2010-12-13T00:00:00+01:00">lun. 13 décembre 2010</a>
+      </li>
+      <li class="muted">&middot;</li>
+      <li class="post-category">
+        <a href="http://danc.github.io/category/misc.html">misc</a>
+      </li>
+        <li class="muted">&middot;</li>
+        <li>
+            <a href="http://danc.github.io/tag/ruby.html">ruby</a>,             <a href="http://danc.github.io/tag/rails.html">rails</a>,             <a href="http://danc.github.io/tag/cantine.html">cantine</a>,             <a href="http://danc.github.io/tag/lacnr.html">lacnr</a>        </li>
+    </ul>
+    <div class="post-content">
+      <p>Ce lundi, je suis allé voir une présentation de ruby on rails par
+Nicolas Ledez à la <a href="http://www.lacantine-rennes.net/">Cantine</a>.</p>
+<p>Un premier contact avec la communauté Ruby rennaise, et l’occasion de
+vérifier deux trois trucs :</p>
+<ul>
+<li>est-ce vrai que les programmeurs ruby écrivent toujours leurs tests
+avant de coder ? (pas tout à fait)</li>
+<li>est-ce vrai que les programmeurs ruby ont tous des MAC ? (presque)</li>
+<li>est-ce que les programmeurs ruby sont si jeunes qu’ils ne connaissent
+pas la
+<a href="http://linuxdevcenter.com/pub/a/linux/2001/11/29/ruby.html">parenté</a> de
+leur langage avec <a href="http://ruby-doc.org/docs/ProgrammingRuby/">Smalltalk</a>
+? (Ca c’est pour assurer la ligne éditoriale sur l’ <em>histoire</em> des
+langages informatiques)</li>
+</ul>
+<p>Plus sérieusement, pas mal de monde dans la salle, beaucoup d’étudiants
+ou jeunes développeurs, dont certains en ruby/rails, quelques
+auto-entrepreneurs, —un miliardaire business angel—, et moi.
+Il existe donc <a href="http://www.dexem.fr/">quelques</a>
+<a href="http://www.xilinus.com/">boites</a> sur Rennes qui font du développement
+ruby on rails.</p>
+<p>C’était aussi l’occasion, après avoir joué un peu de mon côté avec ruby,
+de voir les outils, méthodes, une démo live, et quelques astuces ou
+pointeurs intéressants.</p>
+<p>Nicolas, qui ne se présente pas comme un développeur, mais comme une
+personne qui utilise ruby on rails depuis 6 mois, a fait une
+présentation et un tour d’horizon des possibilités du framework, ainsi
+que :</p>
+<ul>
+<li>la gestion du code source avec git en local + à distance (repository
+privé ou public sous github)</li>
+<li>la gestion des dépendances avec bundler (à ne pas confondre avec
+buildr !)</li>
+<li>les tests unitaires / fonctionnels avec junit/rspec/cucumber</li>
+<li>le déploiement (hébergement heroku, ou à la main avec apache +
+passenger et capistrano)</li>
+</ul>
+<p>un cycle de développement complet, avec la distinction claire entre
+environnements de dev/test/production par des fichiers de configuration
+générés par le framework rails.</p>
+<p>Pour faire très rapide, un environnement de développement ruby on rails,
+une fois les outils installés (ruby + gem rails et dépendances) se fait
+en quelques lignes :</p>
+<div class="highlight"><pre>rails new TaskManager
+cd TaskManager
+bundle install
+rails server
+</pre></div>
+
+
+<p><strong>Et voilà</strong>, un serveur web local intégré permet déjà d’accéder à son
+application sur le port 3000 …</p>
+<p>Puis on peut raffiner en créant des modèles, controlleurs et leurs vues
+associées par quelques commandes supplémentaires :</p>
+<div class="highlight"><pre>rails generate scaffold Reunions title:string description:text
+rails generate controller … … …
+rails generate view … … …
+</pre></div>
+
+
+<p>( à compléter)</p>
+<p>L’ajout de quelques gems (= librairies) comme <code>will_paginate</code> ou
+<code>devise</code> permettent respectivement d’ajouter simplement de la pagination
+ou la gestion d’authentification à l’application.</p>
+<p>En fin de soirée, quelques discussions sur les tests ( creuser la
+différence entre rspec et cucumber, qui semblent indifféremment utilisés
+pour des TUs ou des tests d’intégration).</p>
+<p>Nicolas a <a href="http://www.rennesonrails.com/?p=288">mis en ligne</a> le code de
+sa démo, ainsi que quelques pointeurs.</p>
+<p><a href="http://www.scribd.com/doc/45336428/Rails-bar-12">Les slides</a></p>
+<p>En conclusion, un framework qui permet de développer rapidement des
+applications, avec des librairies riches et une communauté active.</p>
+<p>Framework
+<a href="http://fr.wikipedia.org/wiki/Mod%C3%A8le-Vue-Contr%C3%B4leur">MVC</a> et
+<a href="http://fr.wikipedia.org/wiki/REST">REST</a> de base.</p>
+<p>Merci Nicolas !</p>
+<hr />
+<p>Note to self : dans la même veine, voir <a href="http://www.springsource.org/roo">Spring
+ROO</a> ,
+<a href="http://www.grails.org/">Grails</a>, et
+<a href="http://www.playframework.org/">playframework</a></p>
+    </div>
+  </div>
+  <hr class="separator">
+  <div class="col-md-8 col-md-offset-2">
+  </div>
+  </div>
+<footer class="footer">
+  <div class="container">
+    <p class="text-center">
+      Daniel, <a href="" target="_blank"></a> unless otherwise noted.
+    </p>
+    <div class="text-center">
+      Generated by <a href="http://getpelican.com" target="_blank">Pelican</a> with the <a href="http://github.com/nairobilug/pelican-alchemy">alchemy</a> theme.
+    </div>
+  </div>
+</footer> <!-- /.footer -->
+  <script src="http://danc.github.io/theme/js/jquery.min.js"></script>
+  <script src="http://danc.github.io/theme/js/bootstrap.min.js"></script>
+</body> <!-- 42 -->
+
+</html>

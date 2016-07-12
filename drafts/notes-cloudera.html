@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+      <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="canonical" href="http://danc.github.io/drafts/notes-cloudera.html" />
+
+    <title>  Don't Panic &mdash; Notes Cloudera
+</title>
+
+
+
+
+    <link rel="stylesheet" href="http://danc.github.io/theme/css/style.css">
+
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+      <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+
+    <meta name="author" content="Daniel">
+    <meta name="description" content="Notes utilisation Cloudera sudo service cloudera-scm-agent start sudo service cloudera-scm-server restart tutorial Notes : 4GB RAM (recommandé 8) 2 CPU sudo /home/cloudera/cloudera-manager --force http://quickstart.cloudera:7180 Import # import des données locales mysql dans hdfs sqoop import-all-tables \ -m 1 \ --connect jdbc:mysql://quickstart.cloudera:3306/retail_db \ --username ...">
+  <meta name="tags" contents="hadoop, bigdata, cloudera, ">
+</head>
+
+<body>
+<header class="header">
+  <div class="container">
+    <div class="header-inner">
+      <h1 class="header-name">
+        <a class="nodec" href="http://danc.github.io">Don't Panic</a>
+      </h1>
+      <h3 class="header-text"></h3>
+      <ul class="header-menu list-inline">
+          <li><a class="nodec icon-github" href="https://github.com/danc"></a></li>
+          <li><a class="nodec icon-twitter" href="https://twitter.com/tintouli"></a></li>
+      </ul>
+    </div>
+  </div>
+</header> <!-- /.header -->  <div class="container">
+  <div class="post full-post">
+    <h1 class="post-title">
+      <a href="/drafts/notes-cloudera.html" title="Permalink to Notes Cloudera">Notes Cloudera</a>
+    </h1>
+    <ul class="list-inline">
+      <li class="post-date">
+        <a class="text-muted" href="/drafts/notes-cloudera.html" title="2015-03-04T00:00:00+01:00">mer. 04 mars 2015</a>
+      </li>
+      <li class="muted">&middot;</li>
+      <li class="post-category">
+        <a href="http://danc.github.io/category/misc.html">misc</a>
+      </li>
+        <li class="muted">&middot;</li>
+        <li>
+            <a href="http://danc.github.io/tag/hadoop.html">hadoop</a>,             <a href="http://danc.github.io/tag/bigdata.html">bigdata</a>,             <a href="http://danc.github.io/tag/cloudera.html">cloudera</a>        </li>
+    </ul>
+    <div class="post-content">
+      <h1>Notes utilisation Cloudera</h1>
+<div class="highlight"><pre>sudo service cloudera-scm-agent start
+sudo service cloudera-scm-server restart
+</pre></div>
+
+
+<h2>tutorial</h2>
+<p>Notes : 4GB RAM (recommandé 8) 2 CPU</p>
+<div class="highlight"><pre>sudo /home/cloudera/cloudera-manager --force
+</pre></div>
+
+
+<p>http://quickstart.cloudera:7180</p>
+<h3>Import</h3>
+<div class="highlight"><pre><span class="c"># import des données locales mysql dans hdfs    </span>
+<span class="n">sqoop</span> <span class="n">import</span><span class="o">-</span><span class="nb">all</span><span class="o">-</span><span class="n">tables</span> \
+  <span class="o">-</span><span class="n">m</span> <span class="mi">1</span> \
+  <span class="o">--</span><span class="n">connect</span> <span class="n">jdbc</span><span class="p">:</span><span class="n">mysql</span><span class="p">:</span><span class="o">//</span><span class="n">quickstart</span><span class="o">.</span><span class="n">cloudera</span><span class="p">:</span><span class="mi">3306</span><span class="o">/</span><span class="n">retail_db</span> \
+  <span class="o">--</span><span class="n">username</span><span class="o">=</span><span class="n">retail_dba</span> \
+  <span class="o">--</span><span class="n">password</span><span class="o">=</span><span class="n">cloudera</span> \
+  <span class="o">--</span><span class="n">compression</span><span class="o">-</span><span class="n">codec</span><span class="o">=</span><span class="n">snappy</span> \
+  <span class="o">--</span><span class="k">as</span><span class="o">-</span><span class="n">avrodatafile</span> \
+  <span class="o">--</span><span class="n">warehouse</span><span class="o">-</span><span class="nb">dir</span><span class="o">=/</span><span class="n">user</span><span class="o">/</span><span class="n">hive</span><span class="o">/</span><span class="n">warehouse</span>
+
+<span class="c"># Vérification du résultat</span>
+<span class="n">hadoop</span> <span class="n">fs</span> <span class="o">-</span><span class="n">ls</span> <span class="o">/</span><span class="n">user</span><span class="o">/</span><span class="n">hive</span><span class="o">/</span><span class="n">warehouse</span>
+
+<span class="c"># envoi des schémas avro pour hive</span>
+<span class="n">sudo</span> <span class="o">-</span><span class="n">u</span> <span class="n">hdfs</span> <span class="n">hadoop</span> <span class="n">fs</span> <span class="o">-</span><span class="n">mkdir</span> <span class="o">/</span><span class="n">user</span><span class="o">/</span><span class="n">examples</span>
+<span class="n">sudo</span> <span class="o">-</span><span class="n">u</span> <span class="n">hdfs</span> <span class="n">hadoop</span> <span class="n">fs</span> <span class="o">-</span><span class="n">chmod</span> <span class="o">+</span><span class="n">rw</span> <span class="o">/</span><span class="n">user</span><span class="o">/</span><span class="n">examples</span>
+<span class="n">hadoop</span> <span class="n">fs</span> <span class="o">-</span><span class="n">copyFromLocal</span> <span class="o">~/*.</span><span class="n">avsc</span> <span class="o">/</span><span class="n">user</span><span class="o">/</span><span class="n">examples</span><span class="o">/</span>
+</pre></div>
+
+
+<h3>Hive</h3>
+<div class="highlight"><pre># accéder à hive pour définir les tables
+hive
+hive&gt;
+</pre></div>
+
+
+<p>CREATE EXTERNAL TABLE categories
+ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.avro.AvroSerDe'
+STORED AS INPUTFORMAT 'org.apache.hadoop.hive.ql.io.avro.AvroContainerInputFormat'
+OUTPUTFORMAT 'org.apache.hadoop.hive.ql.io.avro.AvroContainerOutputFormat'
+LOCATION 'hdfs:///user/hive/warehouse/categories'
+TBLPROPERTIES ('avro.schema.url'='hdfs://quickstart.cloudera/user/examples/sqoop_import_categories.avsc');</p>
+<p>CREATE EXTERNAL TABLE customers
+ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.avro.AvroSerDe'
+STORED AS INPUTFORMAT 'org.apache.hadoop.hive.ql.io.avro.AvroContainerInputFormat'
+OUTPUTFORMAT 'org.apache.hadoop.hive.ql.io.avro.AvroContainerOutputFormat'
+LOCATION 'hdfs:///user/hive/warehouse/customers'
+TBLPROPERTIES ('avro.schema.url'='hdfs://quickstart.cloudera/user/examples/sqoop_import_customers.avsc');</p>
+<p>CREATE EXTERNAL TABLE departments
+ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.avro.AvroSerDe'
+STORED AS INPUTFORMAT 'org.apache.hadoop.hive.ql.io.avro.AvroContainerInputFormat'
+OUTPUTFORMAT 'org.apache.hadoop.hive.ql.io.avro.AvroContainerOutputFormat'
+LOCATION 'hdfs:///user/hive/warehouse/departments'
+TBLPROPERTIES ('avro.schema.url'='hdfs://quickstart.cloudera/user/examples/sqoop_import_departments.avsc');</p>
+<p>CREATE EXTERNAL TABLE orders
+ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.avro.AvroSerDe'
+STORED AS INPUTFORMAT 'org.apache.hadoop.hive.ql.io.avro.AvroContainerInputFormat'
+OUTPUTFORMAT 'org.apache.hadoop.hive.ql.io.avro.AvroContainerOutputFormat'
+LOCATION 'hdfs:///user/hive/warehouse/orders'
+TBLPROPERTIES ('avro.schema.url'='hdfs://quickstart.cloudera/user/examples/sqoop_import_orders.avsc');</p>
+<p>CREATE EXTERNAL TABLE order_items
+ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.avro.AvroSerDe'
+STORED AS INPUTFORMAT 'org.apache.hadoop.hive.ql.io.avro.AvroContainerInputFormat'
+OUTPUTFORMAT 'org.apache.hadoop.hive.ql.io.avro.AvroContainerOutputFormat'
+LOCATION 'hdfs:///user/hive/warehouse/order_items'
+TBLPROPERTIES ('avro.schema.url'='hdfs://quickstart.cloudera/user/examples/sqoop_import_order_items.avsc');</p>
+<p>CREATE EXTERNAL TABLE products
+ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.avro.AvroSerDe'
+STORED AS INPUTFORMAT 'org.apache.hadoop.hive.ql.io.avro.AvroContainerInputFormat'
+OUTPUTFORMAT 'org.apache.hadoop.hive.ql.io.avro.AvroContainerOutputFormat'
+LOCATION 'hdfs:///user/hive/warehouse/products'
+TBLPROPERTIES ('avro.schema.url'='hdfs://quickstart.cloudera/user/examples/sqoop_import_products.avsc');</p>
+<div class="highlight"><pre>hive&gt; show tables;
+hive&gt; exit;
+</pre></div>
+
+
+<p>Requêtes Hive ou Impala  (sql standard)</p>
+<p>-- top 10 revenue generating products
+select p.product_id, p.product_name, r.revenue
+from products p inner join
+(select oi.order_item_product_id, sum(cast(oi.order_item_subtotal as float)) as revenue
+from order_items oi inner join orders o
+on oi.order_item_order_id = o.order_id
+where o.order_status &lt;&gt; 'CANCELED'
+and o.order_status &lt;&gt; 'SUSPECTED_FRAUD'
+group by order_item_product_id) r
+on p.product_id = r.order_item_product_id
+order by r.revenue desc
+limit 10;</p>
+<div class="highlight"><pre>#chargement de données de logs 
+sudo -u hdfs hadoop fs -mkdir /user/hive/warehouse/original_access_logs
+sudo -u hdfs hadoop fs -copyFromLocal /opt/examples/log_files/access.log.2 /user/hive/warehouse/original_access_logs
+</pre></div>
+
+
+<h3>Spark</h3>
+<div class="highlight"><pre>spark-shell --jars /usr/lib/avro/avro-mapred.jar \
+--conf spark.serializer=org.apache.spark.serializer.KryoSerializer
+
+scala&gt;
+</pre></div>
+
+
+<p>// First we're going to import the classes we need and open some of the files
+// we imported from our relational database into Hadoop with Sqoop</p>
+<p>import org.apache.avro.generic.GenericRecord
+import org.apache.avro.mapred.{AvroInputFormat, AvroWrapper}
+import org.apache.hadoop.io.NullWritable</p>
+<p>val warehouse = "hdfs://quickstart.cloudera/user/hive/warehouse/"</p>
+<p>val order_items_path = warehouse + "order_items"
+val order_items = sc.hadoopFile[AvroWrapper[GenericRecord], NullWritable, AvroInputFormat[GenericRecord]](order_items_path)</p>
+<p>val products_path = warehouse + "products"
+val products = sc.hadoopFile[AvroWrapper[GenericRecord], NullWritable, AvroInputFormat[GenericRecord]](products_path)</p>
+<p>// Next, we extract the fields from order_items and products that we care about
+// and get a list of every product, its name and quantity, grouped by order</p>
+<p>val orders = order_items.map { x =&gt; (
+    x._1.datum.get("order_item_product_id"),
+    (x._1.datum.get("order_item_order_id"), x._1.datum.get("order_item_quantity")))
+}.join(
+  products.map { x =&gt; (
+    x._1.datum.get("product_id"),
+    (x._1.datum.get("product_name")))
+  }
+).map(x =&gt; (
+    scala.Int.unbox(x._2._1._1), // order_id
+    (
+        scala.Int.unbox(x._2._1._2), // quantity
+        x._2._2.toString // product_name
+    )
+)).groupByKey()</p>
+<p>// Finally, we tally how many times each combination of products appears
+// together in an order, and print the 10 most common combinations.</p>
+<p>val cooccurrences = orders.map(order =&gt;
+  (
+    order._1,
+    order._2.toList.combinations(2).map(order_pair =&gt;
+        (
+            if (order_pair(0)._2 &lt; order_pair(1)._2) (order_pair(0)._2, order_pair(1)._2) else (order_pair(1)._2, order_pair(0)._2),
+            order_pair(0)._1 * order_pair(1)._1
+        )
+    )
+  )
+)
+val combos = cooccurrences.flatMap(x =&gt; x._2).reduceByKey((a, b) =&gt; a + b)
+val mostCommon = combos.map(x =&gt; (x._2, x._1)).sortByKey(false).take(10)</p>
+<p>println(mostCommon.deep.mkString("\n"))</p>
+<h3>Flume , SolR</h3>
+<p>Flume + Morphline : ETL import des données, 
+SolR : indexation</p>
+<h4>Creating an empty configuration</h4>
+<div class="highlight"><pre>solrctl --zk quickstart.cloudera:2181/solr instancedir --generate solr_configs
+</pre></div>
+
+
+<h4>Uploading the  configuration</h4>
+<div class="highlight"><pre>solrctl --zk quickstart.cloudera:2181/solr instancedir --create live_logs ./solr_configs
+</pre></div>
+
+
+<h4>Creating your collection</h4>
+<div class="highlight"><pre>solrctl --zk quickstart.cloudera:2181/solr collection --create live_logs -s 1
+
+flume-ng agent --conf /opt/examples/flume/conf --conf-file /opt/examples/flume/conf/flume.conf --name agent1 -Dflume.root.logger=DEBUG,INFO,console
+</pre></div>
+    </div>
+  </div>
+  <hr class="separator">
+  <div class="col-md-8 col-md-offset-2">
+  </div>
+  </div>
+<footer class="footer">
+  <div class="container">
+    <p class="text-center">
+      Daniel, <a href="" target="_blank"></a> unless otherwise noted.
+    </p>
+    <div class="text-center">
+      Generated by <a href="http://getpelican.com" target="_blank">Pelican</a> with the <a href="http://github.com/nairobilug/pelican-alchemy">alchemy</a> theme.
+    </div>
+  </div>
+</footer> <!-- /.footer -->
+  <script src="http://danc.github.io/theme/js/jquery.min.js"></script>
+  <script src="http://danc.github.io/theme/js/bootstrap.min.js"></script>
+</body> <!-- 42 -->
+
+</html>

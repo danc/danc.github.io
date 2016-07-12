@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+      <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="canonical" href="http://danc.github.io/drafts/notes-hortonworks.html" />
+
+    <title>  Don't Panic &mdash; Notes Hortonworks
+</title>
+
+
+
+
+    <link rel="stylesheet" href="http://danc.github.io/theme/css/style.css">
+
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+      <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+
+    <meta name="author" content="Daniel">
+    <meta name="description" content="Sandbox Hortonworks http://hortonworks.com/hadoop-tutorial/hello-world-an-introduction-to-hadoop-hcatalog-hive-and-pig/ Chargement de données dans HDFS données compressées https://s3.amazonaws.com/hw-sandbox/tutorial1/NYSE-2000-2001.tsv.gz Select the ‘Upload’ button Select ‘Files’ and a pop-up window will appear. Click the button which says, ‘Upload a file’. Locate the example data file you downloaded ...">
+  <meta name="tags" contents="hadoop, bigdata, hortonworks, ">
+</head>
+
+<body>
+<header class="header">
+  <div class="container">
+    <div class="header-inner">
+      <h1 class="header-name">
+        <a class="nodec" href="http://danc.github.io">Don't Panic</a>
+      </h1>
+      <h3 class="header-text"></h3>
+      <ul class="header-menu list-inline">
+          <li><a class="nodec icon-github" href="https://github.com/danc"></a></li>
+          <li><a class="nodec icon-twitter" href="https://twitter.com/tintouli"></a></li>
+      </ul>
+    </div>
+  </div>
+</header> <!-- /.header -->  <div class="container">
+  <div class="post full-post">
+    <h1 class="post-title">
+      <a href="/drafts/notes-hortonworks.html" title="Permalink to Notes Hortonworks">Notes Hortonworks</a>
+    </h1>
+    <ul class="list-inline">
+      <li class="post-date">
+        <a class="text-muted" href="/drafts/notes-hortonworks.html" title="2015-03-17T00:00:00+01:00">mar. 17 mars 2015</a>
+      </li>
+      <li class="muted">&middot;</li>
+      <li class="post-category">
+        <a href="http://danc.github.io/category/misc.html">misc</a>
+      </li>
+        <li class="muted">&middot;</li>
+        <li>
+            <a href="http://danc.github.io/tag/hadoop.html">hadoop</a>,             <a href="http://danc.github.io/tag/bigdata.html">bigdata</a>,             <a href="http://danc.github.io/tag/hortonworks.html">hortonworks</a>        </li>
+    </ul>
+    <div class="post-content">
+      <h1>Sandbox Hortonworks</h1>
+<p>http://hortonworks.com/hadoop-tutorial/hello-world-an-introduction-to-hadoop-hcatalog-hive-and-pig/</p>
+<h2>Chargement de données dans HDFS</h2>
+<p>données compressées</p>
+<p>https://s3.amazonaws.com/hw-sandbox/tutorial1/NYSE-2000-2001.tsv.gz</p>
+<ul>
+<li>Select the ‘Upload’ button</li>
+<li>Select ‘Files’ and a pop-up window will appear.</li>
+<li>Click the button which says, ‘Upload a file’.</li>
+<li>Locate the example data file you downloaded and select it.</li>
+<li>A progress meter will appear. The upload may take a few moments.</li>
+</ul>
+<h2>Visualisation dans HCatalog</h2>
+<p>Définition du métamodèle (type et caractéristique de chaque colonne)</p>
+<h2>Requêtage dans Hive</h2>
+<p>Les bases HCatalog sont directement accessibles.</p>
+<p>On voit la décomposition en jobs Map Reduce dans les logs</p>
+<div class="highlight"><pre>    select count(*) from nyse2001
+
+    select * from nyse2001 where stock_symbol= &quot;IBM&quot;
+</pre></div>
+
+
+<h2>Pig</h2>
+<ul>
+<li>Step 1: Create and name the script</li>
+<li>
+<p>Step 2: Loading the data</p>
+<p>a = LOAD ‘default.nyse_stocks’ USING org.apache.hive.hcatalog.pig.HCatLoader();</p>
+</li>
+<li>
+<p>Step 3: Select all records starting with IBM</p>
+<p>b = filter a by stock_symbol == 'IBM';
+c = group b all;</p>
+</li>
+<li>
+<p>Step 4: iterate and average</p>
+<p>d = FOREACH c GENERATE AVG(b.stock_volume);
+DUMP d;</p>
+</li>
+<li>
+<p>Step 5: save the script and execute it</p>
+</li>
+</ul>
+<p>paramètre de pig :</p>
+<div class="highlight"><pre>-useHCatalog (entrée)
+</pre></div>
+
+
+<h1>Tutorial 2 PIG</h1>
+<p>http://hortonworks.com/hadoop-tutorial/how-to-process-data-with-apache-pig/</p>
+<div class="highlight"><pre>batting = load &#39;Batting.csv&#39; using PigStorage(&#39;,&#39;);
+runs = FOREACH batting GENERATE $0 as playerID, $1 as year, $8 as runs;
+grp_data = GROUP runs BY (year);
+max_runs = FOREACH grp_data GENERATE group as grp,MAX(runs.runs) as max_runs;
+join_max_run = JOIN max_runs by ($0, max_runs), runs by (year,runs);  
+join_data = FOREACH join_max_run GENERATE $0 as year, $2 as playerID, $1 as runs;  
+dump join_data;
+</pre></div>
+
+
+<h1>Tutorial 3 Hive</h1>
+<p>http://hortonworks.com/hadoop-tutorial/how-to-process-data-with-apache-hive/</p>
+<div class="highlight"><pre>create table temp_batting (col_value STRING);
+LOAD DATA INPATH &#39;/user/hue/Batting.csv&#39; OVERWRITE INTO TABLE temp_batting;
+create table batting (player_id STRING, year INT, runs INT);
+insert overwrite table batting  
+SELECT  
+regexp_extract(col_value, &#39;^(?:([^,]*)\,?){1}&#39;, 1) player_id,  
+regexp_extract(col_value, &#39;^(?:([^,]*)\,?){2}&#39;, 1) year,  
+regexp_extract(col_value, &#39;^(?:([^,]*)\,?){9}&#39;, 1) run  
+from temp_batting;
+
+SELECT year, max(runs) FROM batting GROUP BY year;
+
+SELECT a.year, a.player_id, a.runs from batting a  
+JOIN (SELECT year, max(runs) runs FROM batting GROUP BY year ) b  
+ON (a.year = b.year AND a.runs = b.runs) ;
+</pre></div>
+    </div>
+  </div>
+  <hr class="separator">
+  <div class="col-md-8 col-md-offset-2">
+  </div>
+  </div>
+<footer class="footer">
+  <div class="container">
+    <p class="text-center">
+      Daniel, <a href="" target="_blank"></a> unless otherwise noted.
+    </p>
+    <div class="text-center">
+      Generated by <a href="http://getpelican.com" target="_blank">Pelican</a> with the <a href="http://github.com/nairobilug/pelican-alchemy">alchemy</a> theme.
+    </div>
+  </div>
+</footer> <!-- /.footer -->
+  <script src="http://danc.github.io/theme/js/jquery.min.js"></script>
+  <script src="http://danc.github.io/theme/js/bootstrap.min.js"></script>
+</body> <!-- 42 -->
+
+</html>

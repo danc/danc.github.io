@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+      <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="canonical" href="http://danc.github.io/notes-scala.html" />
+
+    <title>  Don't Panic &mdash; Notes scala
+</title>
+
+
+
+
+    <link rel="stylesheet" href="http://danc.github.io/theme/css/style.css">
+
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+      <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+
+    <meta name="author" content="Daniel">
+    <meta name="description" content="source scala> List(1, 3, 5, 7, 9).map(_ * 2) res0: List[Int] = List(2, 6, 10, 14, 18) laziness scala> List(1, 3, 5, 7, 9).toStream res1: scala.collection.immutable.Stream[Int] = Stream(1, ?) scala> res1.map(_ * 2) res4: scala.collection.immutable.Stream[Int] = Stream(2 ...">
+  <meta name="tags" contents="scala, ">
+</head>
+
+<body>
+<header class="header">
+  <div class="container">
+    <div class="header-inner">
+      <h1 class="header-name">
+        <a class="nodec" href="http://danc.github.io">Don't Panic</a>
+      </h1>
+      <h3 class="header-text"></h3>
+      <ul class="header-menu list-inline">
+          <li><a class="nodec icon-github" href="https://github.com/danc"></a></li>
+          <li><a class="nodec icon-twitter" href="https://twitter.com/tintouli"></a></li>
+      </ul>
+    </div>
+  </div>
+</header> <!-- /.header -->  <div class="container">
+  <div class="post full-post">
+    <h1 class="post-title">
+      <a href="/notes-scala.html" title="Permalink to Notes scala">Notes scala</a>
+    </h1>
+    <ul class="list-inline">
+      <li class="post-date">
+        <a class="text-muted" href="/notes-scala.html" title="2015-02-25T00:00:00+01:00">mer. 25 février 2015</a>
+      </li>
+      <li class="muted">&middot;</li>
+      <li class="post-category">
+        <a href="http://danc.github.io/category/misc.html">misc</a>
+      </li>
+        <li class="muted">&middot;</li>
+        <li>
+            <a href="http://danc.github.io/tag/scala.html">scala</a>        </li>
+    </ul>
+    <div class="post-content">
+      <p><a href="http://confreaks.tv/videos/pnws2014-apache-spark-i-from-scala-collections-to-fast-interactive-big-data-with-spark">source</a></p>
+<div class="highlight"><pre> scala&gt; List(1, 3, 5, 7, 9).map(_ * 2)
+ res0: List[Int] = List(2, 6, 10, 14, 18)
+</pre></div>
+
+
+<h1>laziness</h1>
+<div class="highlight"><pre>scala&gt; List(1, 3, 5, 7, 9).toStream
+res1: scala.collection.immutable.Stream[Int] = Stream(1, ?)
+
+scala&gt; res1.map(_ * 2)
+res4: scala.collection.immutable.Stream[Int] = Stream(2, ?)
+
+scala&gt; res4.toList
+res5: List[Int] = List(2, 6, 10, 14, 18)
+</pre></div>
+
+
+<h1>installation</h1>
+<p><a href="http://spark.apache.org/downloads.html">http://spark.apache.org/downloads.html</a></p>
+<h2>Lancement du shell</h2>
+<div class="highlight"><pre>sc est défini par défaut (instance de SparkContext)
+</pre></div>
+
+
+<h2>Calcul de Pi</h2>
+<p>https://github.com/apache/spark/blob/master/examples/src/main/scala/org/apache/spark/examples/SparkPi.scala</p>
+<div class="highlight"><pre><span class="kn">import</span> <span class="nn">scala.math.random</span>
+<span class="n">val</span> <span class="n">slices</span> <span class="o">=</span> <span class="k">if</span> <span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">length</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="n">args</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">toInt</span> <span class="k">else</span> <span class="mi">2</span>
+<span class="n">val</span> <span class="n">n</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="il">100000L</span> <span class="o">*</span> <span class="n">slices</span><span class="p">,</span> <span class="n">Int</span><span class="o">.</span><span class="n">MaxValue</span><span class="p">)</span><span class="o">.</span><span class="n">toInt</span> <span class="o">//</span> <span class="n">avoid</span> <span class="n">overflow</span>
+<span class="n">val</span> <span class="n">count</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">parallelize</span><span class="p">(</span><span class="mi">1</span> <span class="n">until</span> <span class="n">n</span><span class="p">,</span> <span class="n">slices</span><span class="p">)</span><span class="o">.</span><span class="n">map</span> <span class="p">{</span> <span class="n">i</span> <span class="o">=&gt;</span>
+    <span class="n">val</span> <span class="n">x</span> <span class="o">=</span> <span class="n">random</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">-</span> <span class="mi">1</span>
+    <span class="n">val</span> <span class="n">y</span> <span class="o">=</span> <span class="n">random</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">-</span> <span class="mi">1</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">x</span><span class="o">*</span><span class="n">x</span> <span class="o">+</span> <span class="n">y</span><span class="o">*</span><span class="n">y</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">)</span> <span class="mi">1</span> <span class="k">else</span> <span class="mi">0</span>
+<span class="p">}</span><span class="o">.</span><span class="n">reduce</span><span class="p">(</span><span class="n">_</span> <span class="o">+</span> <span class="n">_</span><span class="p">)</span>
+<span class="n">println</span><span class="p">(</span><span class="s">&quot;Pi is roughly &quot;</span> <span class="o">+</span> <span class="mf">4.0</span> <span class="o">*</span> <span class="n">count</span> <span class="o">/</span> <span class="n">n</span><span class="p">)</span>
+</pre></div>
+
+
+<p># Spark + SQL</p>
+<p>http://christopher-batey.blogspot.fr/2015/01/spark-cassandra-basics-connecting-to.html</p>
+<p>cp spark-defaults.conf.template spark-defaults.conf
+daniel@rnslap170-linux:~/spark-1.3.0-bin-hadoop2.4/conf$ nano spark-defaults.conf</p>
+<p>spark.cassandra.connection.host=127.0.0.1</p>
+<p>daniel@rnslap170-linux:~/spark-1.3.0-bin-hadoop2.4/conf$ cd ..
+daniel@rnslap170-linux:~/spark-1.3.0-bin-hadoop2.4$ bin/spark-shell --jars lib/spark-cassandra-connector_2.10-1.2.0-rc3.jar </p>
+<p>import com.datastax.spark.connector._
+ scala&gt; val rdd = sc.cassandraTable("dco", "table1")
+rdd: com.datastax.spark.connector.rdd.CassandraRDD[com.datastax.spark.connector.CassandraRow] = CassandraRDD[0] at RDD at CassandraRDD.scala:49</p>
+<p>scala&gt; rdd.toArray.foreach(println)</p>
+<h1></h1>
+<p>http://blueplastic.com/databricks/toy_file.txt</p>
+<p>​
+            val whaleRDD = inputRDD.filter(line =&gt; line.contains("WHALE"))
+            ​
+            val doesRDD = inputRDD.filter(line =&gt; line.contains("does"))
+            doesRDD.count()
+            doesRDD.first()
+            whaleRDD.collect()
+                ​
+val bothRDD = whaleRDD.union(doesRDD)
+​
+val distinctbothRDD = bothRDD.distinct()
+bothRDD.saveAsTextFile("file:///home/ubuntu/bothRDD")</p>
+<h1></h1>
+<div class="highlight"><pre>val rawblocks = sc.textFile(&quot;/home/daniel/tmp/linkage&quot;) # prend tous les fichiers du dossier
+head = rawblocks.take(10)
+rawblocks.first # header du fichier csv
+...
+</pre></div>
+
+
+<p>res: String = "id_1","id_2","cmp_fname_c1","cmp_fname_c2",...</p>
+<div class="highlight"><pre>head.foreach(println)
+</pre></div>
+
+
+<p>...
+"id_1","id_2","cmp_fname_c1","cmp_fname_c2","cmp_lname_c1","cmp_lname_c2",
+"cmp_sex","cmp_bd","cmp_bm","cmp_by","cmp_plz","is_match"
+37291,53113,0.833333333333333,?,1,?,1,1,1,1,0,TRUE
+39086,47614,1,?,1,?,1,1,1,1,1,TRUE
+70031,70237,1,?,1,?,1,1,1,1,1,TRUE
+84795,97439,1,?,1,?,1,1,1,1,1,TRUE
+36950,42116,1,?,1,1,1,1,1,1,1,TRUE
+42413,48491,1,?,1,?,1,1,1,1,1,TRUE
+25965,64753,1,?,1,?,1,1,1,1,1,TRUE
+49451,90407,1,?,1,?,1,1,1,1,0,TRUE
+39932,40902,1,?,1,?,1,1,1,1,1,TRUE</p>
+<div class="highlight"><pre>head.length
+</pre></div>
+
+
+<p>res: Int = 9</p>
+<h2>distinguer les lignes de header contenant id_1</h2>
+<div class="highlight"><pre>def isHeader(line: String): Boolean = {
+line.contains(&quot;id_1&quot;)
+}
+
+head.filterNot(isHeader).length
+</pre></div>
+
+
+<p>...
+res: Int = 9</p>
+<div class="highlight"><pre>  head.filter(x =&gt; !isHeader(x)).length
+</pre></div>
+
+
+<p>...
+res: Int = 9</p>
+<div class="highlight"><pre>head.filter(!isHeader(_)).length
+</pre></div>
+
+
+<p>...
+res: Int = 9</p>
+    </div>
+  </div>
+  <hr class="separator">
+  <div class="col-md-8 col-md-offset-2">
+  </div>
+  </div>
+<footer class="footer">
+  <div class="container">
+    <p class="text-center">
+      Daniel, <a href="" target="_blank"></a> unless otherwise noted.
+    </p>
+    <div class="text-center">
+      Generated by <a href="http://getpelican.com" target="_blank">Pelican</a> with the <a href="http://github.com/nairobilug/pelican-alchemy">alchemy</a> theme.
+    </div>
+  </div>
+</footer> <!-- /.footer -->
+  <script src="http://danc.github.io/theme/js/jquery.min.js"></script>
+  <script src="http://danc.github.io/theme/js/bootstrap.min.js"></script>
+</body> <!-- 42 -->
+
+</html>

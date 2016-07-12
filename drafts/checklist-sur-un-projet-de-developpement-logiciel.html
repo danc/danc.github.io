@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+      <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="canonical" href="http://danc.github.io/drafts/checklist-sur-un-projet-de-developpement-logiciel.html" />
+
+    <title>  Don't Panic &mdash; Checklist sur un projet de développement logiciel
+</title>
+
+
+
+
+    <link rel="stylesheet" href="http://danc.github.io/theme/css/style.css">
+
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+      <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+
+    <meta name="author" content="Daniel">
+    <meta name="description" content="Objectifs : Améliorer la qualité logicielle, interne et externe interne : qualité perçue par les équipes, confiance dans le produit externe : prise en compte des exigences, performances, évolutivité Améliorer la productivité logicielle réactivité, process, culture d’équipe, agilité ? Déclinaison des objectifs principaux en objectifs/tâches/moyens adaptés, priorisés Estimation des investissements, coûts ...">
+  <meta name="tags" contents="qualite, agile, scrum, maven, hudson, sonar, nexus, code, ">
+</head>
+
+<body>
+<header class="header">
+  <div class="container">
+    <div class="header-inner">
+      <h1 class="header-name">
+        <a class="nodec" href="http://danc.github.io">Don't Panic</a>
+      </h1>
+      <h3 class="header-text"></h3>
+      <ul class="header-menu list-inline">
+          <li><a class="nodec icon-github" href="https://github.com/danc"></a></li>
+          <li><a class="nodec icon-twitter" href="https://twitter.com/tintouli"></a></li>
+      </ul>
+    </div>
+  </div>
+</header> <!-- /.header -->  <div class="container">
+  <div class="post full-post">
+    <h1 class="post-title">
+      <a href="/drafts/checklist-sur-un-projet-de-developpement-logiciel.html" title="Permalink to Checklist sur un projet de développement logiciel">Checklist sur un projet de développement logiciel</a>
+    </h1>
+    <ul class="list-inline">
+      <li class="post-date">
+        <a class="text-muted" href="/drafts/checklist-sur-un-projet-de-developpement-logiciel.html" title="2010-12-21T00:00:00+01:00">mar. 21 décembre 2010</a>
+      </li>
+      <li class="muted">&middot;</li>
+      <li class="post-category">
+        <a href="http://danc.github.io/category/misc.html">misc</a>
+      </li>
+        <li class="muted">&middot;</li>
+        <li>
+            <a href="http://danc.github.io/tag/qualite.html">qualite</a>,             <a href="http://danc.github.io/tag/agile.html">agile</a>,             <a href="http://danc.github.io/tag/scrum.html">scrum</a>,             <a href="http://danc.github.io/tag/maven.html">maven</a>,             <a href="http://danc.github.io/tag/hudson.html">hudson</a>,             <a href="http://danc.github.io/tag/sonar.html">sonar</a>,             <a href="http://danc.github.io/tag/nexus.html">nexus</a>,             <a href="http://danc.github.io/tag/code.html">code</a>        </li>
+    </ul>
+    <div class="post-content">
+      <ul>
+<li>Objectifs :  </li>
+<li>Améliorer la qualité logicielle, interne et externe  </li>
+<li>interne : qualité perçue par les équipes, confiance dans le
+produit  </li>
+<li>externe : prise en compte des exigences, performances, évolutivité  </li>
+<li>Améliorer la productivité logicielle  </li>
+<li>
+<p>réactivité, process, culture d’équipe, agilité ?</p>
+</li>
+<li>
+<p>Déclinaison des objectifs principaux en objectifs/tâches/moyens
+adaptés, priorisés  </p>
+</li>
+<li>
+<p>Estimation des investissements, coûts de mise en oeuvre, de
+maintenance, et ROI de chacune des tâches</p>
+</li>
+<li>
+<p>Etat des lieux :<br />
+ * Comment se déroule un projet ? Quel est son cycle réel
+(reqs/specs/codage/TU/integration/validation/livraison/maintenance) ?<br />
+ * Quelles sont les entrées/sorties du projet (documents, livrables)
+?<br />
+ * Sous quelle forme, et à quelle période, les exigences entrent dans
+le projet ?<br />
+ * Quels indicateurs existent sur le projet ? Comment sont-ils établis
+? pour qui ? Comment sont-ils utilisés ?<br />
+ ex: LoC, nombre TUs, qualimétrie, nb bugs, exigences prises en compte,
+…<br />
+ * Quel degré d’automatisation, d’outillage est déjà en place, et à
+quelle étape du cycle de vie ?</p>
+</li>
+<li>
+<p>Points importants :<br />
+ * des tests unitaires (TU) sont ils mis en place ? avec un outil de
+couverture de tests ?<br />
+ * Existe-t-il des revues de code/architecture ? qui y est associé ?<br />
+ * Existe-t-il une traçabilité
+exigence-spécifications-développement-tests ? avec quel outil ?<br />
+ * Existe-t-il un plan qualité logiciel ?<br />
+ * Existe-t-il un plan de gestion de configuration ?<br />
+ * Fait-on la différence entre TU et tests d’intégration, de validation
+? dispose-t-on d’outils automatisés pour les dérouler ?<br />
+ * Quelles sont les capacités d’introspection de l’équipe (bilans,
+revues, refactoring, communication interne, …)</p>
+</li>
+<li>
+<p>Expériences, et proposition d’outils ou de pistes de travail<br />
+ * Sensibilisation aux tests unitaires, automatisés (TU et TI)<br />
+ <s>> Orange Labs/Orange update<br />
+ 4 développeurs C++<br />
+ Montée en compétence de l’équipe sur TU,<br />
+ Stagnation des TUs : mise en place de librairies de mock</p>
+</li>
+</ul>
+<p></s>> formation interne DT SII : TU et librairies de mock<br />
+ retour d’expérience pour 2x 15 personnes pôle CIM (DT SII)</p>
+<p>* Ingéniérie des exigences</p>
+<p><s>> QualityCenter, groupe Orange<br />
+</s>> etude comparative d’outils de gestion des exigences (Salomé, RTH,
+XStudio) pour DT SII</p>
+<p>* Méthodes agiles, Scrum<br />
+ <s>> certifié ScrumMaster en 2009, formation par des intervenants
+auprès de ’Fortune 500’ US<br />
+</s>> OrangeLabs/Orange update :<br />
+ équipe multi-sites : intervention en tant qu’architecte logiciel +
+support ScrumMaster<br />
+ 8 mois de développement / 10 + sprints de 2 à 3 semaines<br />
+ Revues de code/refactoring<br />
+ Planifications de sprints et démos de sprints<br />
+ Daily meeting inter-site (telephone + mail + messagerie instantanée +
+rencontres régulières pour points techniques spécifiques)<br />
+ Outil partagé ScrumWorks<br />
+ Gestion des exigences/defects sous QualityCenter<br />
+ Mise en place de tests fonctionnels automatisés (hudson + scripts
+python)</p>
+<p>* Automatisation des process et gestion du cycle :<br />
+ -> intégration continue hudson (Orange labs + interne DT SII,
+plusieurs équipes de 2 à 6 personnes, technologies variées Java
+JEE/C+<em>/Flex/Dojo/PHP/… )<br />
+ <s>> Mise en place d’une infrastructure maven + Nexus : gestion des
+dépendance et rationalisation de l’organisation des projets (DT SII)<br />
+</s>> Analyse qualimétrique : Mise en place Sonar</em> plugins hudson PMD,
+Checkstyle, couverture de tests (DT SII)<br />
+ * \~ 15 ans expérience développement objet, conception UML, Design
+Patterns<br />
+ * \~ 5 ans architecture fonctionnelle et logicielle, en contexte R&amp;D</p>
+<p>Blog pro perso (depuis 12/2010 !) http://danc.alwaysdata.net</p>
+    </div>
+  </div>
+  <hr class="separator">
+  <div class="col-md-8 col-md-offset-2">
+  </div>
+  </div>
+<footer class="footer">
+  <div class="container">
+    <p class="text-center">
+      Daniel, <a href="" target="_blank"></a> unless otherwise noted.
+    </p>
+    <div class="text-center">
+      Generated by <a href="http://getpelican.com" target="_blank">Pelican</a> with the <a href="http://github.com/nairobilug/pelican-alchemy">alchemy</a> theme.
+    </div>
+  </div>
+</footer> <!-- /.footer -->
+  <script src="http://danc.github.io/theme/js/jquery.min.js"></script>
+  <script src="http://danc.github.io/theme/js/bootstrap.min.js"></script>
+</body> <!-- 42 -->
+
+</html>
